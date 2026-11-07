@@ -89,6 +89,7 @@ const dec=r=>{const a=new Uint8Array(OLD*OLD);let p=0,v=0;for(const n of r){a.fi
 const rle=a=>{const r=[];let v=a[0],n=0;for(const c of a){if(c===v)n++;else{r.push(v,n);v=c;n=1}}r.push(v,n);return r};
 const unrle=(r,a)=>{let p=0;for(let q=0;q+1<r.length;q+=2){a.fill(r[q],p,p+r[q+1]);p+=r[q+1]}};
 let blds=[],res=[],me=null,mode='orbit',tool='geser',admin=false,saveT,night=false;
+let RIDE=null,rideY=0,vehSp=1,VEH='';
 const chunks=new Map(),ck=(cx,cz)=>cx+','+cz;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const hash=(a,b)=>{const s=Math.sin(a*127.1+b*311.7)*43758.5453;return s-Math.floor(s)};
@@ -443,10 +444,11 @@ function rebuildChunk(c){
   const e=!(isLi(i-1,j)&&isLi(i+1,j)&&isLi(i,j-1)&&isLi(i,j+1));
   m.makeScale(1.002,1.6,1.002).setPosition(x,e?-.68:-.5,z);c.tile.setMatrixAt(n,m);col.setHex(e?0xe3cf94:0x6aa84f).offsetHSL((hash(i*3,j)-.5)*.03,0,(h-.5)*.09);c.tile.setColorAt(n,col);n++;
   const rv=c.rd[k];
-  if(rv){if(rv!==1||!PKH.road){m.makeTranslation(x,e?.16:.34,z);c.rdm.setMatrixAt(r,m);col.setHex(RC[rv]).offsetHSL(0,0,(h-.5)*.03);c.rdm.setColorAt(r,col);r++}
+  if(rv){if(!PKH.road){m.makeTranslation(x,e?.16:.34,z);c.rdm.setMatrixAt(r,m);col.setHex(RC[rv]).offsetHSL(0,0,(h-.5)*.03);c.rdm.setColorAt(r,col);r++}
    const yb=(e?.2:.38)+.02,N=rdAt(i,j-1),Sx=rdAt(i,j+1),W=rdAt(i-1,j),E=rdAt(i+1,j);
    if(rv===1){const cb=0xf3f3ee;if(!PKH.road){if(h>.82)MKR(x+(h2-.5)*.5,yb,z+(h-.9)*3,.22,.02,.12,0x34343a,h*6);if(!N)MKR(x,yb,z-.42,.96,.03,.05,cb);if(!Sx)MKR(x,yb,z+.42,.96,.03,.05,cb);if(!W)MKR(x-.42,yb,z,.05,.03,.96,cb);if(!E)MKR(x+.42,yb,z,.05,.03,.96,cb);
     if(W&&E&&!N&&!Sx&&i%2===0)MKR(x,yb+.005,z,.5,.03,.06,cb);if(N&&Sx&&!W&&!E&&j%2===0)MKR(x,yb+.005,z,.06,.03,.5,cb)}}
+   else if(PKH.road){}
    else if(rv===3){MKR(x,yb,z,.98,.03,.03,0x8f8a7c);MKR(x,yb,z,.03,.03,.98,0x8f8a7c);MKR(x,yb,z-.25,.98,.025,.02,0x9a9486);MKR(x,yb,z+.25,.98,.025,.02,0x9a9486)}
    else for(let q=0;q<3;q++){const a=hash(i+q*7,j),b=hash(j+q*3,i);MKR(x+(a-.5)*.8,yb,z+(b-.5)*.8,.07+a*.06,.04,.07+b*.05,q%2?0x8a7a68:0x6a5a48,a*6)}}
   else if(h2>.78&&fw<XFL&&!bi.some(b=>Math.hypot(x-b.x,z-b.z)<CAT[b.i][3]+.4)){const a=hash(i*2.1,j*.7)-.5,b2=hash(j*1.3,i*3.1)-.5,fx=x+a*.7,fz=z+b2*.7;
@@ -583,7 +585,7 @@ if(m==='edit'){if(was!=='edit'){az=0;el=1.05;dist=70}if(was==='pov')tgt.set(px,0
 if(m==='orbit'&&was!=='orbit'){el=.6;dist=42;if(was==='pov')tgt.set(px,0,pz)}
 $('pad').style.display='block';$('sheet').style.display=m==='edit'?'block':'none';$('cz').style.display=m==='pov'?'none':'flex';document.body.classList.toggle('ed',m==='edit');ui();if(m==='edit')hint()}
 function fly(x,z){if(mode==='pov')setMode('orbit');if(mode==='edit'){}else if(mode!=='orbit')setMode('orbit');tgt.set(x,0,z);dist=Math.min(Math.max(dist,12),20);auto=false}
-function placeCam(){if(mode==='pov'){const dd=inside?0:pd3;if(dd<.8){cam.position.set(px,sit&&inside?.8:1.1,pz);cam.rotation.set(pit,yaw,0,'YXZ')}else{const cp=Math.cos(pit);cam.position.set(px+Math.sin(yaw)*cp*dd,Math.max(.5,1.3-Math.sin(pit)*dd),pz+Math.cos(yaw)*cp*dd);cam.lookAt(px,1.1,pz)}}else{const e=el;cam.position.set(tgt.x+dist*Math.cos(e)*Math.sin(az),dist*Math.sin(e),tgt.z+dist*Math.cos(e)*Math.cos(az));cam.lookAt(tgt)}}
+function placeCam(){if(mode==='pov'){const dd=inside?0:pd3;if(dd<.8){cam.position.set(px,(sit&&inside?.8:1.1)+rideY,pz);cam.rotation.set(pit,yaw,0,'YXZ')}else{const cp=Math.cos(pit);cam.position.set(px+Math.sin(yaw)*cp*dd,Math.max(.5,1.3-Math.sin(pit)*dd)+rideY,pz+Math.cos(yaw)*cp*dd);cam.lookAt(px,1.1+rideY,pz)}}else{const e=el;cam.position.set(tgt.x+dist*Math.cos(e)*Math.sin(az),dist*Math.sin(e),tgt.z+dist*Math.cos(e)*Math.cos(az));cam.lookAt(tgt)}}
 const ray=new THREE.Raycaster(),pl=new THREE.Plane(new THREE.Vector3(0,1,0),-.3);
 function ground(e){ray.setFromCamera({x:e.clientX/innerWidth*2-1,y:-(e.clientY/innerHeight)*2+1},cam);const v=new THREE.Vector3();return ray.ray.intersectPlane(pl,v)?v:null}
 function editTile(i,j){const cur=isLi(i,j);
@@ -593,7 +595,7 @@ function editTile(i,j){const cur=isLi(i,j);
  if(tool==='jalan'){const t=+$('rsel').value;if(c.rd[q]===t)return 0;c.rd[q]=t;markDirty(i,j,1);return 1}
  if(tool==='hjalan'){if(!c.rd[q])return 0;c.rd[q]=0;markDirty(i,j,1);return 1}return 0}
 let lastP=null;
-function paint(e){const v=ground(e);if(!v)return;const b=+$('brush').value,rd=tool==='jalan'||tool==='hjalan';let ch=0;const a=lastP||v,n=Math.min(120,Math.max(1,Math.ceil(Math.hypot(v.x-a.x,v.z-a.z)/.5)));
+function paint(e){if(tool==='jalan')return;const v=ground(e);if(!v)return;const b=+$('brush').value,rd=tool==='jalan'||tool==='hjalan';let ch=0;const a=lastP||v,n=Math.min(120,Math.max(1,Math.ceil(Math.hypot(v.x-a.x,v.z-a.z)/.5)));
 for(let s=1;s<=n;s++){const ci=Math.floor(a.x+(v.x-a.x)*s/n),cj=Math.floor(a.z+(v.z-a.z)*s/n);
 if(rd){for(let j=-Math.floor((b-1)/2);j<=Math.ceil((b-1)/2);j++)for(let i=-Math.floor((b-1)/2);i<=Math.ceil((b-1)/2);i++)if(editTile(ci+i,cj+j))ch=1}
 else for(let j=-b;j<=b;j++)for(let i=-b;i<=b;i++){if(Math.hypot(i,j)>b+.2)continue;if(editTile(ci+i,cj+j))ch=1}}
@@ -631,7 +633,7 @@ if(P.size===2){if(mode==='pov'){const nd0=pdist();pd3=Math.min(14,Math.max(0,pd3
 if(mode==='orbit'||(mode==='edit'&&tool==='putar')){az-=dx*.007;el=Math.min(1.5,Math.max(.15,el+dy*.005))}
 else if(mode==='pov'){yaw-=dx*.005;pit=Math.min(1.2,Math.max(-1.2,pit-dy*.004))}
 else if(tool==='geser'||(PKH.pan&&PKH.pan(tool)))pan(dx,dy);else if(PT.includes(tool))paint(e)};
-cv.onpointerup=cv.onpointercancel=e=>{lastP=null;if(P.size===1&&(moved<8||(!pz2&&mode==='edit'&&tool==='bangunan')))tap(e);P.delete(e.pointerId)};
+cv.onpointerup=cv.onpointercancel=e=>{lastP=null;if(P.size===1&&(moved<8||(!pz2&&mode==='edit'&&(tool==='bangunan'||tool==='jalan'))))tap(e);P.delete(e.pointerId)};
 cv.addEventListener('pointermove',ghMove);cv.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse')hideGhost()});
 cv.onwheel=e=>{if(mode==='pov'){pd3=Math.min(14,Math.max(0,pd3+e.deltaY*.01));return}dist=Math.min(MX(),Math.max(8,dist*(1+e.deltaY*.001)))};
 const KM={w:'w',arrowup:'w',s:'s',arrowdown:'s',a:'a',arrowleft:'a',d:'d',arrowright:'d',q:'q',e:'e',z:'z',x:'x'};
@@ -640,7 +642,7 @@ const pad=$('pad');let pa=0;const pm=e=>{if(!pa)return;const r=pad.getBoundingCl
 pad.onpointerdown=e=>{pad.setPointerCapture(e.pointerId);pa=1;auto=false;pm(e)};pad.onpointermove=pm;pad.onpointerup=pad.onpointercancel=()=>{pa=0;jx=jy=0;$('knob').style.transform=''};
 /* tombol alat admin */
 const TL=[['geser','✋ Geser'],['putar','🔄 Putar'],['tambah','➕ Darat'],['hapus','➖ Darat'],['jalan','🛣️ Jalan'],['hjalan','🧽 Hapus jalan'],['rel','🚄 Rel layang'],['stasiun','🚉 Stasiun'],['hrel','🗑️ Rel/Stasiun'],['warna','🎨 Warna bgn'],['isi','🛋️ Isi rumah'],['bangunan','🏛️ Taruh'],['gbgn','↔️ Pindah bgn'],['nama','✏️ Nama'],['putarb','🔁 Putar bgn'],['hb','🗑️ Bangunan'],['hp','🌊 Hapus pulau']];
-const HT={rel:'Tap titik-titik di darat atau laut: rel layang melengkung halus & kereta cepat otomatis jalan. Tap titik terakhir lagi = batal titik. Tap tombol Rel lagi = mulai jalur baru.',stasiun:'Tap dekat rel untuk menaruh stasiun layang. Kereta berhenti di tiap stasiun.',hrel:'Tap stasiun atau rel untuk menghapusnya.',warna:'Tap bangunan, lalu pilih warna dinding & atap.',isi:'Tap rumah untuk mengganti isi dalam (jenis ruangan, warna dinding & lantai).',gbgn:'Tap bangunan, lalu tap tujuan. Grid & sejajar otomatis bikin simetris.',geser:'1 jari = geser peta. 2 jari = zoom & geser. Joystick & tombol kanan juga bisa. Dunia tanpa batas, geser sejauh yang kamu mau.',putar:'Seret untuk memutar & memiringkan kamera.',tambah:'Gambar di tepi pulau untuk memperluas, atau di laut untuk pulau baru. Tidak ada batas wilayah.',hapus:'Seret untuk menghapus daratan.',jalan:'Pilih jenis jalan (Aspal = hitam + garis putih), lalu tap sekali atau tarik di daratan. Slider = lebar jalan.',hjalan:'Seret di atas jalan untuk menghapusnya.',bangunan:'Pilih bangunan, lalu tap daratan (atau seret untuk mengatur posisi, lepas untuk menaruh). Grid & sejajar bikin simetris. Nama boleh dikosongkan.',nama:'Tap bangunan untuk ganti nama (kosongkan = tanpa tulisan) atau hapus.',putarb:'Tap bangunan/pagar untuk memutarnya 45° setiap tap.',hb:'Tap bangunan untuk menghapusnya.',hp:'Tap sebuah pulau untuk menghapus seluruh pulau itu.'};
+const HT={rel:'Tap titik-titik di darat atau laut: rel layang melengkung halus & kereta cepat otomatis jalan. Tap titik terakhir lagi = batal titik. Tap tombol Rel lagi = mulai jalur baru.',stasiun:'Tap dekat rel untuk menaruh stasiun layang. Kereta berhenti di tiap stasiun.',hrel:'Tap stasiun atau rel untuk menghapusnya.',warna:'Tap bangunan, lalu pilih warna dinding & atap.',isi:'Tap rumah untuk mengganti isi dalam (jenis ruangan, warna dinding & lantai).',gbgn:'Tap bangunan, lalu tap tujuan. Grid & sejajar otomatis bikin simetris.',geser:'1 jari = geser peta. 2 jari = zoom & geser. Joystick & tombol kanan juga bisa. Dunia tanpa batas, geser sejauh yang kamu mau.',putar:'Seret untuk memutar & memiringkan kamera.',tambah:'Gambar di tepi pulau untuk memperluas, atau di laut untuk pulau baru. Tidak ada batas wilayah.',hapus:'Seret untuk menghapus daratan.',jalan:'Tap kotak grid = titik awal. Tap kotak tujuan = jalan lurus sejajar grid (kiri/kanan/atas/bawah), simetris otomatis. Mau belok? tap lagi ke arah lain, tikungan aspal tetap membulat. Tap titik terakhir = selesai. Seret = geser pratinjau, lepas = pasang. Slider = lebar jalan.',hjalan:'Seret di atas jalan untuk menghapusnya.',bangunan:'Pilih bangunan, lalu tap daratan (atau seret untuk mengatur posisi, lepas untuk menaruh). Grid & sejajar bikin simetris. Nama boleh dikosongkan.',nama:'Tap bangunan untuk ganti nama (kosongkan = tanpa tulisan) atau hapus.',putarb:'Tap bangunan/pagar untuk memutarnya 45° setiap tap.',hb:'Tap bangunan untuk menghapusnya.',hp:'Tap sebuah pulau untuk menghapus seluruh pulau itu.'};
 function hint(){$('hint').textContent=HT[tool];$('tools').innerHTML=TL.map(([t,l])=>`<button class="btn${t===tool?' on':''}" data-t="${t}">${l}</button>`).join('');$('tools').querySelectorAll('button').forEach(b=>b.onclick=()=>{tool=b.dataset.t;hint()});$('bgrp').style.display=$('bsel').style.display=tool==='bangunan'?'':'none';$('rsel').style.display=tool==='jalan'?'':'none';$('snp').style.display=(tool==='bangunan'||tool==='gbgn')?'':'none';hideGhost();mvSel=null;gridBuild();$('brush').style.display=PT.includes(tool)?'':'none';if(tool==='jalan'||tool==='hjalan')$('brush').value=2}
 const fillB=()=>{const g=+$('bgrp').value;$('bsel').innerHTML=CAT.map((c,i)=>c[4]===g?`<option value="${i}">${c[0]}</option>`:'').join('')};
 $('bgrp').innerHTML=GN.map((g,i)=>`<option value="${i}">${g}</option>`).join('');$('bgrp').onchange=fillB;fillB();
@@ -713,12 +715,12 @@ $('cs').onclick=kirim;$('ct').onkeydown=e=>{if(e.key==='Enter')kirim()};
 /* ===== loop ===== */
 function resize(){R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}onresize=resize;resize();
 let t0=performance.now();
-function loop0(now){const dt=Math.min(.05,(now-t0)/1000),t=now/1000;t0=now;
+function loop0(now){const dt=Math.min(.05,(now-t0)/1000),t=now/1000;t0=now;if(RIDE)try{rideSync()}catch(e){dbg(e)}
 for(let i=0;i<op.count;i++)op.setY(i,Math.sin(t*1.2+ph[i])*.14);op.needsUpdate=true;
 if(mode==='orbit'&&auto)az+=dt*.1;if(spinO&&spinT>0){spinO.rotation.y+=dt*8;spinT-=dt}
-if(mode==='pov'){if(sit&&(k.w||k.s||k.a||k.d||Math.abs(jx)>.2||Math.abs(jy)>.2))sit=false;const fx=Math.max(-1,Math.min(1,k.d-k.a+jx)),fz=Math.max(-1,Math.min(1,k.w-k.s-jy)),sp=(sit?0:3)*dt,mx=(Math.cos(yaw)*fx-Math.sin(yaw)*fz)*sp,mz=(-Math.sin(yaw)*fx-Math.cos(yaw)*fz)*sp;pvMv=(Math.abs(mx)+Math.abs(mz))>1e-5?1:0;if(pvMv)pvRot=Math.atan2(mx,mz);
+if(mode==='pov'){if(sit&&(k.w||k.s||k.a||k.d||Math.abs(jx)>.2||Math.abs(jy)>.2))sit=false;const fx=Math.max(-1,Math.min(1,k.d-k.a+jx)),fz=Math.max(-1,Math.min(1,k.w-k.s-jy)),sp=(sit||RIDE?0:3*vehSp)*dt,mx=(Math.cos(yaw)*fx-Math.sin(yaw)*fz)*sp,mz=(-Math.sin(yaw)*fx-Math.cos(yaw)*fz)*sp;pvMv=(Math.abs(mx)+Math.abs(mz))>1e-5?1:0;if(pvMv)pvRot=Math.atan2(mx,mz);
 if(wk(px+mx,pz+mz)){px+=mx;pz+=mz}else if(wk(px+mx,pz))px+=mx;else if(wk(px,pz+mz))pz+=mz}
-for(const r of res)try{if(r===me&&mode==='pov'){r.x=px;r.z=pz;r.g.visible=!inside&&pd3>=.8;r.mv=pvMv;if(pvMv)r.g.rotation.y=pvRot}else{r.g.visible=true;const ox=r.x,oz=r.z;wander(r,dt);r.mv=Math.hypot(r.x-ox,r.z-oz)>1e-4}if(r.lg){const sw=r.mv?Math.sin(t*9+r.n.length)*.6:0;r.lg[0].rotation.x=sw;r.lg[1].rotation.x=-sw;r.ar[0].rotation.x=-sw*.8;r.ar[1].rotation.x=sw*.8}r.g.position.set(r.x,.3+Math.abs(Math.sin(t*7+r.n.length))*.03,r.z);if(r.lab){const d=mode==='pov'?Math.hypot(r.x-px,r.z-pz):Math.hypot(r.x-tgt.x,r.z-tgt.z),lim=mode==='pov'?9:(dist<=28?14:0);r.lab.visible=r.g.visible&&d<lim&&!(inside&&r!==me);if(r.lab.visible)r.lab.material.opacity=Math.max(.2,Math.min(1,(lim-d)/(lim*.4)))}}catch(e){dbg(e)}
+for(const r of res)try{if(r===me&&mode==='pov'){r.x=px;r.z=pz;r.g.visible=!inside&&pd3>=.8&&!RIDE&&!(VEH==='mobil'||VEH==='jip'||VEH==='bus');r.mv=pvMv;if(pvMv)r.g.rotation.y=pvRot}else{r.g.visible=true;const ox=r.x,oz=r.z;wander(r,dt);r.mv=Math.hypot(r.x-ox,r.z-oz)>1e-4}if(r.lg){const sw=r.mv&&!(r===me&&VEH)?Math.sin(t*9+r.n.length)*.6:0;r.lg[0].rotation.x=sw;r.lg[1].rotation.x=-sw;r.ar[0].rotation.x=-sw*.8;r.ar[1].rotation.x=sw*.8}r.g.position.set(r.x,.3+(r===me&&mode==='pov'&&VEH?(VEH==='sepeda'||VEH==='motor'?.24:0):Math.abs(Math.sin(t*7+r.n.length))*.03),r.z);if(r.lab){const d=mode==='pov'?Math.hypot(r.x-px,r.z-pz):Math.hypot(r.x-tgt.x,r.z-tgt.z),lim=mode==='pov'?9:(dist<=28?14:0);r.lab.visible=r.g.visible&&d<lim&&!(inside&&r!==me);if(r.lab.visible)r.lab.material.opacity=Math.max(.2,Math.min(1,(lim-d)/(lim*.4)))}}catch(e){dbg(e)}
 if(mode!=='pov'){const sp=dist*.7*dt,fx=Math.max(-1,Math.min(1,(k.d||0)-(k.a||0)+jx)),fz=Math.max(-1,Math.min(1,(k.w||0)-(k.s||0)-jy));tgt.x+=(Math.cos(az)*fx-Math.sin(az)*fz)*sp;tgt.z+=(-Math.sin(az)*fx-Math.cos(az)*fz)*sp;az+=((k.rr||0)-(k.rl||0)+(k.e||0)-(k.q||0))*dt*1.2;el=Math.min(1.5,Math.max(.15,el+((k.tu||0)-(k.td||0))*dt));dist=Math.min(MX(),Math.max(8,dist*(1+((k.zo||0)-(k.zi||0)+(k.x||0)-(k.z||0))*dt*1.2)))}
 const cx0=mode==='pov'?px:tgt.x,cz0=mode==='pov'?pz:tgt.z,sn=800/60;ocean.position.x=Math.round(cx0/sn)*sn;ocean.position.z=Math.round(cz0/sn)*sn;cloudG.position.set(cx0,0,cz0);
 placeCam();envUpdate(t,now,cx0,cz0);if(window.xUpd)try{xUpd(dt,t,cx0,cz0)}catch(e){dbg(e)}gridUpd();R.render(S,cam)}
@@ -904,8 +906,8 @@ let lx=null,lz=0,acc=0;const o0=window.xUpd;
 window.xUpd=(dt,t,cx,cz)=>{if(o0)o0(dt,t,cx,cz);try{tick(dt,t,cx,cz)}catch(e){dbg(e)}};
 function tick(dt,t,cx,cz){G.visible=P.visible=!inside;const sl=slotN();if(st.col.s!==sl){st.col={s:sl,ids:[]};sv();if(started)toast('🪙 Koin baru muncul di pulau!');ck0=''}
 const e=cur(),k=Math.floor(cx/20)+','+Math.floor(cz/20)+'|'+sl+e.n+(mnt()<10);if(k!==ck0){ck0=k;rebuild(cx,cz)}
-const sc=mode==='pov'?1:Math.max(1,dist/14);for(const c of cs){c.m.rotation.y=t*2+c.o;c.m.position.y=.9+Math.sin(t*2+c.o)*.12;c.m.scale.setScalar(sc*(c.t?1.4:1));if(mode==='pov'&&!inside&&Math.hypot(c.x-px,c.z-pz)<1.6){collect(c);break}}
-if(mode==='pov'){if(lx!==null){const d=Math.hypot(px-lx,pz-lz);if(d<3)acc+=d;if(acc>=5){prog('walk',acc|0);acc%=1}}lx=px;lz=pz}else lx=null;
+const sc=mode==='pov'?1:Math.max(1,dist/14);for(const c of cs){c.m.rotation.y=t*2+c.o;c.m.position.y=.9+Math.sin(t*2+c.o)*.12;c.m.scale.setScalar(sc*(c.t?1.4:1));if(mode==='pov'&&!inside&&!RIDE&&Math.hypot(c.x-px,c.z-pz)<1.6){collect(c);break}}
+if(mode==='pov'){if(lx!==null){const d=Math.hypot(px-lx,pz-lz);if(d<3&&!RIDE)acc+=d/vehSp;if(acc>=5){prog('walk',acc|0);acc%=1}}lx=px;lz=pz}else lx=null;
 const ps=mode==='pov'?[px,pz]:me?[me.x,me.z]:null,pk=IT[st.eq.pet]?st.eq.pet:'';
 if(pk!==petK){if(petS)G.remove(petS);petS=pk?petMk(pk):null;if(petS){G.add(petS);if(ps)petS.position.set(ps[0]-1,.3,ps[1]-1)}petK=pk}
 if(petS){petS.visible=!!ps&&!inside;if(ps){const u=petS.userData,dx=ps[0]-petS.position.x,dz=ps[1]-petS.position.z,d=Math.hypot(dx,dz);let mv=0;if(d>16){petS.position.x=ps[0]-1;petS.position.z=ps[1]-1}else if(d>1.4){const v=Math.min(d>4?4.8:2.7,d*2)*dt,nx=petS.position.x+dx/d*v,nz=petS.position.z+dz/d*v;if(wkOK(nx,nz)){petS.position.x=nx;petS.position.z=nz}else if(wkOK(nx,petS.position.z))petS.position.x=nx;else if(wkOK(petS.position.x,nz))petS.position.z=nz;mv=1;const da=((Math.atan2(dx,dz)-petS.rotation.y+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;petS.rotation.y+=da*Math.min(1,dt*8)}
@@ -924,7 +926,12 @@ function prog(k,v){ms();st.m.p[k]=(st.m.p[k]||0)+v;sv();badge()}
 $('cs').addEventListener('click',()=>{if($('ct').value.trim())prog('chat',1)},true);$('ct').addEventListener('keydown',e=>{if(e.key==='Enter'&&$('ct').value.trim())prog('chat',1)},true);
 setInterval(()=>{if(!document.hidden)prog('on',1)},60000);
 /* --- toko --- */
-const IT={kucing:['🐱','Kucing',2000,'pet'],anjing:['🐶','Anjing',4000,'pet'],kelinci:['🐰','Kelinci',1500,'pet'],ayam:['🐔','Ayam',500,'pet'],bebek:['🦆','Bebek',1000,'pet'],burung:['🦜','Burung Beo',5000,'pet'],kambing:['🐐','Anak Kambing',3000,'pet'],aura:['💫','Aura Cahaya',220,'aura'],kembang:['🎆','Kembang Api (sekali pakai)',40,'use']};
+const IT={kucing:['🐱','Kucing',2000,'pet'],anjing:['🐶','Anjing',4000,'pet'],kelinci:['🐰','Kelinci',1500,'pet'],ayam:['🐔','Ayam',500,'pet'],bebek:['🦆','Bebek',1000,'pet'],burung:['🦜','Burung Beo',5000,'pet'],kambing:['🐐','Anak Kambing',3000,'pet'],aura:['💫','Aura Cahaya',220,'aura'],kembang:['🎆','Kembang Api (sekali pakai)',40,'use'],
+sepeda:['🚲','Sepeda',1200,'veh'],motor:['🏍️','Motor',3500,'veh'],mobil:['🚗','Mobil',6000,'veh'],jip:['🚙','Jip Offroad',9000,'veh'],bus:['🚌','Bus Mini',12000,'veh']};
+const TK=['🚆','Tiket Kereta',10],VS={sepeda:1.7,motor:2.6,mobil:3.3,jip:3,bus:2.4};
+let PR={};try{PR=JSON.parse(localStorage.getItem('pk-pr')||'{}')||{}}catch(e){}
+const pr=k=>PR[k]!=null&&PR[k]!==''&&isFinite(+PR[k])&&+PR[k]>=0?Math.round(+PR[k]):(k==='tiket'?TK[2]:IT[k][2]);
+async function pullPr(){try{const r=await fetch(API+'harga_pulau?id=eq.1&select=data',{headers:H});if(!r.ok)throw 0;const a=await r.json();PR=a[0]&&a[0].data||{};try{localStorage.setItem('pk-pr',JSON.stringify(PR))}catch(e){}if(started&&tab!=='p'&&hubE.style.display==='flex')hub()}catch(e){}}
 /* --- UI --- */
 const css=document.createElement('style');css.textContent='#pkc{position:fixed;z-index:5;left:10px;top:calc(66px + env(safe-area-inset-top,0px));background:var(--pn);border:1px solid var(--bd);border-radius:16px;padding:6px 12px;font:700 13px system-ui;color:var(--tx);cursor:pointer;max-width:72vw}#pkc small{display:block;font-weight:500;opacity:.8}#pkx{display:none;position:fixed;inset:0;z-index:21;background:rgba(0,0,0,.5);align-items:center;justify-content:center}#pkx .cd{background:var(--pn);color:var(--tx);border:1px solid var(--bd);border-radius:18px;width:min(390px,93vw);max-height:84vh;overflow:auto;padding:14px;font:14px system-ui}#pkx .tb{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}#pkx .tb .btn{padding:7px 10px;font-size:13px}#pkx .rw{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:7px 0;padding:8px;border:1px solid var(--bd);border-radius:12px}#pkx .rw small{display:block;opacity:.75}#pkx .br{height:6px;border-radius:4px;background:var(--bd);margin-top:5px;overflow:hidden}#pkx .br i{display:block;height:100%;background:var(--ac)}#pkx .dy{display:flex;gap:4px;margin:8px 0}#pkx .dy b{flex:1;text-align:center;padding:6px 0;border-radius:8px;border:1px solid var(--bd);font-size:11px}#pkx .dy b.f{background:var(--ac);color:#fff}#pkx select{width:100%;padding:9px;margin:4px 0;border-radius:10px;border:1px solid var(--bd);background:transparent;color:var(--tx);font-size:15px}';document.head.appendChild(css);
 const chipE=document.createElement('div');chipE.id='pkc';chipE.className='ui';document.body.appendChild(chipE);
@@ -936,13 +943,14 @@ function chip(){const e=cur();chipE.innerHTML='🪙 '+st.c+'<small>'+e.ic+' '+es
 const RW=[20,25,30,40,50,60,150];
 function badge(){const d=dayN();let n=(st.ld!==d)+(st.hs!==slotN());ms().forEach(q=>{if((st.m.p[q.k]||0)>=q.n&&!st.m.r[q.k])n++});bK.textContent='🎁 Hadiah'+(n?' ('+n+')':'');bK.classList.toggle('pri',n>0)}
 let tab='h';
-function hub(t){if(t)tab=t;const e=cur(),d=dayN(),T=[['h','🎁 Hadiah'],['m','📋 Misi'],['s','🛒 Toko'],['e','🎪 Event'],['a','🛠️ Admin']];let b='';
+function hub(t){if(t)tab=t;const e=cur(),d=dayN(),T=[['h','🎁 Hadiah'],['m','📋 Misi'],['s','🛒 Toko'],['e','🎪 Event'],['a','🛠️ Admin']];if(admin)T.push(['p','💰 Harga']);let b='';
 if(tab==='h'){const ci=st.ld!==d,hr=st.hs!==slotN(),dn=ci?(st.ld===d-1?st.sk%7:0):((st.sk-1)%7)+1,nx=ci?(st.ld===d-1?st.sk:0)%7:-1;
 b='<b>📅 Absen harian</b> (streak '+st.sk+' hari)<div class="dy">'+RW.map((r,i)=>'<b class="'+(i<dn?'f':'')+'">'+(i===6?'🎁':'🪙')+r+'</b>').join('')+'</div>'+(ci?'<button class="btn pri" data-a="ci">Absen sekarang +'+RW[nx]+' 🪙</button>':'<small>Sudah absen hari ini ✅ Besok lanjut ya!</small>')+
 '<div class="rw"><div><b>⏰ Hadiah jam-an</b><small>Bisa diambil tiap jam!</small></div>'+(hr?'<button class="btn pri" data-a="hr">+'+10*e.hr+' 🪙</button>':'<small>'+(60-mnt())+' mnt lagi</small>')+'</div><div class="rw"><div><b>⚡ Jam Emas</b><small>Tiap jam menit 0–10: koin 2x lebih banyak & 2x nilai. '+(mnt()<10?'<b>LAGI AKTIF!</b>':'')+'</small></div></div>'}
 else if(tab==='m'){b=ms().map(q=>{const p=Math.min(st.m.p[q.k]||0,q.n),dn=p>=q.n;return'<div class="rw"><div style="flex:1"><b>'+esc(q.t)+'</b><small>'+p+' / '+q.n+' · hadiah '+q.rw+' 🪙</small><div class="br"><i style="width:'+p/q.n*100+'%"></i></div></div>'+(st.m.r[q.k]?'✅':dn?'<button class="btn pri" data-a="mc" data-v="'+q.k+'">Ambil</button>':'')+'</div>'}).join('')+'<small>Selesaikan ketiganya untuk bonus +40 🪙. Misi ganti tiap hari.</small>'}
-else if(tab==='s'){b='<b>Koin kamu: 🪙 '+st.c+'</b>'+Object.keys(IT).map(k=>{const i=IT[k],ow=st.own[k],ty=i[3];let a;if(ty==='pet'||ty==='aura'){const q=ty==='pet'?'pet':'aura';a=ow?'<button class="btn" data-a="eq" data-v="'+k+'">'+(st.eq[q]===(ty==='pet'?k:1)?'Lepas':'Pakai')+'</button>':'<button class="btn pri" data-a="buy" data-v="'+k+'">🪙 '+i[2]+'</button>'}else if(ty==='use')a=(st.inv.kembang?'<button class="btn" data-a="fw">Nyalakan ('+st.inv.kembang+')</button> ':'')+'<button class="btn pri" data-a="buy" data-v="'+k+'">🪙 '+i[2]+'</button>';else a='<button class="btn pri" data-a="buy" data-v="'+k+'">🪙 '+i[2]+'</button>';return'<div class="rw"><div>'+i[0]+' <b>'+i[1]+'</b></div><div>'+a+'</div></div>'}).join('')+'<small>Peliharaan ikut kamu jalan-jalan. Pilih Pakai/Lepas kapan saja.</small>'}
+else if(tab==='s'){b='<b>Koin kamu: 🪙 '+st.c+'</b>'+Object.keys(IT).map(k=>{const i=IT[k],ow=st.own[k],ty=i[3];let a;if(ty==='pet'||ty==='aura'||ty==='veh'){const q=ty==='aura'?'aura':ty;a=ow?'<button class="btn" data-a="eq" data-v="'+k+'">'+(st.eq[q]===(ty==='aura'?1:k)?'Lepas':'Pakai')+'</button>':'<button class="btn pri" data-a="buy" data-v="'+k+'">🪙 '+pr(k)+'</button>'}else if(ty==='use')a=(st.inv.kembang?'<button class="btn" data-a="fw">Nyalakan ('+st.inv.kembang+')</button> ':'')+'<button class="btn pri" data-a="buy" data-v="'+k+'">🪙 '+pr(k)+'</button>';else a='<button class="btn pri" data-a="buy" data-v="'+k+'">🪙 '+pr(k)+'</button>';return'<div class="rw"><div>'+i[0]+' <b>'+i[1]+'</b></div><div>'+a+'</div></div>'}).join('')+'<div class="rw"><div>'+TK[0]+' <b>'+TK[1]+'</b><small>Bayar tiap naik di stasiun (mode POV)</small></div><div><b>🪙 '+pr('tiket')+'</b></div></div><small>Peliharaan ikut kamu jalan-jalan. Kendaraan dipakai di mode POV: lebih cepat. Pilih Pakai/Lepas kapan saja.</small>'}
 else if(tab==='e'){b='<div class="rw"><div><b>'+e.ic+' '+esc(e.n)+'</b><small>'+esc(e.d)+' · sisa '+fm(endMs())+'</small></div></div><b>Jadwal mingguan</b>'+['Min','Sen','Sel','Rab','Kam','Jum','Sab'].map((h,i)=>'<div class="rw" style="'+(i===new Date(now()).getUTCDay()?'border-color:var(--ac)':'')+'"><div>'+EV[i][0]+' <b>'+h+' · '+EV[i][1]+'</b><small>'+EV[i][2]+'</small></div></div>').join('')}
+else if(tab==='p'&&admin){b='<small>Atur harga (koin). Disimpan ke Supabase, berlaku untuk semua pemain. Kosongkan kolom = pakai harga bawaan.</small><div class="rw"><div>'+TK[0]+' <b>'+TK[1]+'</b></div><input type="number" min="0" step="1" data-p="tiket" value="'+pr('tiket')+'" style="width:92px;padding:8px;border-radius:10px;border:1px solid var(--bd);background:transparent;color:var(--tx);font-size:15px"></div>'+Object.keys(IT).map(k=>'<div class="rw"><div>'+IT[k][0]+' <b>'+IT[k][1]+'</b><small>'+({pet:'Peliharaan',veh:'Kendaraan',aura:'Aura','use':'Sekali pakai'}[IT[k][3]]||'')+'</small></div><input type="number" min="0" step="1" data-p="'+k+'" value="'+pr(k)+'" style="width:92px;padding:8px;border-radius:10px;border:1px solid var(--bd);background:transparent;color:var(--tx);font-size:15px"></div>').join('')+'<div class="rw"><button class="btn pri" data-a="ps">💾 Simpan harga</button><button class="btn" data-a="pd">↺ Harga bawaan</button></div>'}
 else{b=admin?'<small>Event buatan admin tampil untuk semua warga (butuh SQL, lihat file event-sistem.sql).</small><select id="pkT">'+EVS.map((q,i)=>'<option value="'+i+'">'+q[0]+' '+q[1]+'</option>').join('')+'</select><select id="pkD"><option value="18e5">30 menit</option><option value="36e5" selected>1 jam</option><option value="72e5">2 jam</option><option value="0">Sampai tengah malam</option></select><div class="rw"><button class="btn pri" data-a="ev">🚀 Mulai event</button><button class="btn red" data-a="evx">⛔ Hentikan</button></div><button class="btn" data-a="rain">🌧️ Hujan Koin 15 menit sekarang</button>':'<div class="rw"><div>Masuk dulu lewat <b>⚙️ Admin</b> (PIN) supaya panel event terbuka.</div><button class="btn pri" data-a="lg">Masuk admin</button></div>'}
 hubE.innerHTML='<div class="cd"><div class="tb">'+T.map(q=>'<button class="btn'+(q[0]===tab?' on':'')+'" data-a="t" data-v="'+q[0]+'">'+q[1]+'</button>').join('')+'<button class="btn" data-a="x">✕</button></div>'+b+'</div>';hubE.style.display='flex'}
 async function launch(o){let ok=0;try{const r=await fetch(RPC+'set_event',{method:'POST',headers:H,body:JSON.stringify({p_pin:adminPin,p_data:o})});ok=r.ok}catch(e){}if(ok){gEv=o;st.lo=null}else{st.lo=o.until?o:null;toast('Tabel event belum ada — jalankan SQL. Event ini cuma di HP kamu.')}ck0='';sv();chip();hub()}
@@ -951,17 +959,20 @@ if(a==='x')hubE.style.display='none';else if(a==='t')hub(v);
 else if(a==='ci'){const n=st.ld===d-1?st.sk+1:1;st.sk=n;st.ld=d;add(RW[(n-1)%7]);toast('📅 Absen hari ke-'+n+' ✅');hub()}
 else if(a==='hr'){st.hs=slotN();add(10*e.hr);prog('hr',1);toast('⏰ Hadiah jam-an +'+10*e.hr+' 🪙');hub()}
 else if(a==='mc'){const m=ms().find(q=>q.k===v);if(m&&(st.m.p[m.k]||0)>=m.n&&!st.m.r[m.k]){st.m.r[m.k]=1;add(m.rw);toast('✅ Misi selesai! +'+m.rw+' 🪙');if(ms().every(q=>st.m.r[q.k])&&!st.m.b){st.m.b=1;add(40);toast('🏆 Semua misi beres! Bonus +40 🪙')}}hub()}
-else if(a==='buy'){const i=IT[v];if(st.c<i[2])return toast('Koin belum cukup 🪙');if(i[3]==='put'){if(await put(v)){st.c-=i[2];sv()}}else{st.c-=i[2];if(i[3]==='use')st.inv.kembang=(st.inv.kembang||0)+1;else{st.own[v]=1;if(i[3]==='pet')st.eq.pet=v;else st.eq.aura=1}sv();toast('Dibeli '+i[0])}chip();hub()}
-else if(a==='eq'){if(IT[v][3]==='pet')st.eq.pet=st.eq.pet===v?'':v;else st.eq.aura=st.eq.aura?0:1;sv();hub()}
+else if(a==='buy'){const i=IT[v];const hg=pr(v);if(st.c<hg)return toast('Koin belum cukup 🪙');if(i[3]==='put'){if(await put(v)){st.c-=hg;sv()}}else{st.c-=hg;if(i[3]==='use')st.inv.kembang=(st.inv.kembang||0)+1;else{st.own[v]=1;if(i[3]==='pet')st.eq.pet=v;else if(i[3]==='veh'){st.eq.veh=v;vehSet()}else st.eq.aura=1}sv();toast('Dibeli '+i[0])}chip();hub()}
+else if(a==='eq'){if(IT[v][3]==='pet')st.eq.pet=st.eq.pet===v?'':v;else if(IT[v][3]==='veh'){st.eq.veh=st.eq.veh===v?'':v;vehSet()}else st.eq.aura=st.eq.aura?0:1;sv();hub()}
 else if(a==='fw'){if(st.inv.kembang>0){const[x0,z0]=pos();st.inv.kembang--;sv();fw(x0,z0);hubE.style.display='none'}}
 else if(a==='lg'){hubE.style.display='none';$('bA').click()}
 else if(a==='ev'){const du=+$('pkD').value;launch({...ev(EVS[+$('pkT').value]),until:du?Date.now()+du:(dayN()+1)*864e5-252e5})}
 else if(a==='evx')launch({});
+else if(a==='ps'){const o={};hubE.querySelectorAll('[data-p]').forEach(i=>{const n=Math.max(0,Math.round(+i.value));if(i.value!==''&&isFinite(n))o[i.dataset.p]=n});let ok=0;try{const r=await fetch(RPC+'set_harga',{method:'POST',headers:H,body:JSON.stringify({p_pin:adminPin,p_data:o})});ok=r.ok}catch(e){}PR=o;try{localStorage.setItem('pk-pr',JSON.stringify(PR))}catch(e){}toast(ok?'Harga disimpan ✅ (semua pemain ikut berubah)':'Tabel harga belum ada — jalankan harga-sistem.sql di Supabase. Harga cuma berubah di HP ini.');hub('p')}
+else if(a==='pd'){PR={};try{localStorage.removeItem('pk-pr')}catch(e){}let ok=0;try{const r=await fetch(RPC+'set_harga',{method:'POST',headers:H,body:JSON.stringify({p_pin:adminPin,p_data:{}})});ok=r.ok}catch(e){}toast(ok?'Harga kembali ke bawaan ✅':'Kembali bawaan (di HP ini)');hub('p')}
 else if(a==='rain')launch({...ev(EVS[7]),until:Date.now()+9e5})};
 chipE.onclick=bK.onclick=()=>hub('h');
-window.PKX={add,get:()=>st.c};
+function vehSet(){VEH=IT[st.eq.veh]?st.eq.veh:'';vehSp=VEH?VS[VEH]||1:1;try{window.PKV&&PKV.refresh&&PKV.refresh()}catch(e){}}
+window.PKX={add,get:()=>st.c,price:pr,spend:n=>{n=Math.max(0,Math.round(+n)||0);if(st.c<n)return false;st.c-=n;sv();chip();badge();return true}};
 /* --- mulai --- */
-pullEv();pullIt();setInterval(pullEv,20000);setInterval(pullIt,30000);setInterval(chip,1000);
+pullEv();pullIt();pullPr();vehSet();setInterval(pullEv,20000);setInterval(pullIt,30000);setInterval(pullPr,30000);setInterval(chip,1000);
 let ls=slotN();setInterval(()=>{if(slotN()!==ls){ls=slotN();badge();toast('⏰ Hadiah jam-an & koin baru siap!')}},20000);
 chip();badge();setTimeout(()=>{started=1;if(st.ld!==dayN())hub('h')},3000);
 })();
@@ -1105,24 +1116,31 @@ function blurV(s,d,n,r){const k=1/(2*r+1);for(let x=0;x<n;x++){let a=0;for(let y
 function maxF(s,d,n,r){for(let y=0;y<n;y++){const o=y*n;for(let x=0;x<n;x++){let m=0;for(let q=Math.max(0,x-r);q<=Math.min(n-1,x+r);q++)if(s[o+q]>m)m=s[o+q];d[o+x]=m}}for(let x=0;x<n;x++)for(let y=0;y<n;y++){let m=0;for(let q=Math.max(0,y-r);q<=Math.min(n-1,y+r);q++)if(d[q*n+x]>m)m=d[q*n+x];s[y*n+x]=m}}
 const RQ=new Set();
 function roadRaster(c){
- if(!c.g)return;const X0=c.cx*C-PADT,Z0=c.cz*C-PADT;let any=0;
- for(let tj=0;tj<TN;tj++)for(let ti=0;ti<TN;ti++){const v=rdAt(X0+ti,Z0+tj)===1?1:0;if(v)any=1;for(let py=0;py<RR;py++){const o=(tj*RR+py)*WP+ti*RR;for(let p=0;p<RR;p++)mkA[o+p]=v}}
- if(!any){if(c.rdp)c.rdp.visible=false;return}
- for(let i=0;i<3;i++){blurH(mkA,mkB,WP,11);blurV(mkB,mkA,WP,11)}
- for(let i=0;i<WP*WP;i++)dA[i]=mkA[i]>TH?1e9:0;
- edt(dA,WP);for(let i=0;i<WP*WP;i++)dA[i]=Math.sqrt(dA[i]);
- mkB.set(dA);maxF(mkB,dB,WP,4);
+ if(!c.g)return;const X0=c.cx*C-PADT,Z0=c.cz*C-PADT,has=[0,0,0,0];
+ for(let tj=0;tj<TN;tj++)for(let ti=0;ti<TN;ti++){const v=rdAt(X0+ti,Z0+tj);if(v>=1&&v<=3)has[v]=1}
+ if(!has[1]&&!has[2]&&!has[3]){if(c.rdp)c.rdp.visible=false;return}
  if(!c.rdc){c.rdc=document.createElement('canvas');c.rdc.width=c.rdc.height=WI;c.rdx=c.rdc.getContext('2d');c.rdi=c.rdx.createImageData(WI,WI)}
- const px=c.rdi.data,gx0=c.cx*C*RR,gz0=c.cz*C*RR,P0=PADT*RR;
- for(let y=0;y<WI;y++)for(let x=0;x<WI;x++){const k=(y+P0)*WP+x+P0,f=mkA[k],o=(y*WI+x)*4;
-  let al=clamp((f-(TH-.03))/.06,0,1);if(al<=0){px[o+3]=0;continue}
-  const d=dA[k];let r=40,g=43,b=48;
-  const n=((x*7+y*13)%11)/11*5;r+=n;g+=n;b+=n;
-  const le=clamp(d-1.1,0,1)*clamp(3.6-d,0,1);
-  let ln=le;
-  if(d>=RR*.34&&d<=RR*1.7&&d>=mkB[k]-1.5){const s=Math.floor((gx0+x+gz0+y)/(RR*.9));if(((s%2)+2)%2===0)ln=Math.max(ln,.9)}
-  if(ln>0){r+=(236-r)*ln;g+=(236-g)*ln;b+=(228-b)*ln}
-  px[o]=r;px[o+1]=g;px[o+2]=b;px[o+3]=al*255}
+ const px=c.rdi.data,gx0=c.cx*C*RR,gz0=c.cz*C*RR,P0=PADT*RR;px.fill(0);
+ for(const T of[2,3,1]){if(!has[T])continue;
+  for(let tj=0;tj<TN;tj++)for(let ti=0;ti<TN;ti++){const v=rdAt(X0+ti,Z0+tj)===T?1:0;for(let py=0;py<RR;py++){const o=(tj*RR+py)*WP+ti*RR;for(let p=0;p<RR;p++)mkA[o+p]=v}}
+  for(let i=0;i<3;i++){blurH(mkA,mkB,WP,11);blurV(mkB,mkA,WP,11)}
+  for(let i=0;i<WP*WP;i++)dA[i]=mkA[i]>TH?1e9:0;
+  edt(dA,WP);for(let i=0;i<WP*WP;i++)dA[i]=Math.sqrt(dA[i]);
+  if(T===1){mkB.set(dA);maxF(mkB,dB,WP,4)}
+  for(let y=0;y<WI;y++)for(let x=0;x<WI;x++){const k=(y+P0)*WP+x+P0,f=mkA[k],o=(y*WI+x)*4;
+   const al=clamp((f-(TH-.03))/.06,0,1);if(al<=0)continue;
+   const d=dA[k];let r,g,b;
+   if(T===1){r=40;g=43;b=48;const n=((x*7+y*13)%11)/11*5;r+=n;g+=n;b+=n;
+    const le=clamp(d-1.1,0,1)*clamp(3.6-d,0,1);let ln=le;
+    if(d>=RR*.34&&d<=RR*1.7&&d>=mkB[k]-1.5){const s=Math.floor((gx0+x+gz0+y)/(RR*.9));if(((s%2)+2)%2===0)ln=Math.max(ln,.9)}
+    if(ln>0){r+=(236-r)*ln;g+=(236-g)*ln;b+=(228-b)*ln}}
+   else if(T===2){const n=((x*7+y*13)%11)/11*12-6,sp=((x*13+y*29+gx0*3+gz0)%37)===0?-26:0;r=156+n+sp;g=124+n+sp;b=88+n+sp;
+    const le=clamp(d-1.1,0,1)*clamp(3.4-d,0,1);r-=le*22;g-=le*22;b-=le*20}
+   else{const n=((x*5+y*11)%9)/9*8-4,gxw=gx0+x,gzw=gz0+y,row=Math.floor(gzw/RR),jx=((gxw+((row&1)?RR/2:0))%RR+RR)%RR,jz=((gzw%RR)+RR)%RR;
+    r=180+n;g=178+n;b=172+n;if(jx<1.2||jz<1.2){r-=34;g-=34;b-=32}
+    const le=clamp(d-1.1,0,1)*clamp(3.2-d,0,1);r+=(228-r)*le*.85;g+=(226-g)*le*.85;b+=(220-b)*le*.85}
+   const oa=px[o+3]/255;let a2=al;if(oa>0){a2=al+oa*(1-al);r=(r*al+px[o]*oa*(1-al))/a2;g=(g*al+px[o+1]*oa*(1-al))/a2;b=(b*al+px[o+2]*oa*(1-al))/a2}
+   px[o]=r;px[o+1]=g;px[o+2]=b;px[o+3]=a2*255}}
  c.rdx.putImageData(c.rdi,0,0);
  if(!c.rdp){const ge=new THREE.PlaneGeometry(C,C);ge.rotateX(-Math.PI/2);c.rdt=new THREE.CanvasTexture(c.rdc);c.rdt.anisotropy=4;c.rdp=new THREE.Mesh(ge,new THREE.MeshLambertMaterial({map:c.rdt,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));c.rdp.position.set(c.cx*C+C/2,.335,c.cz*C+C/2);c.rdp.receiveShadow=true;c.rdp.renderOrder=1;c.g.add(c.rdp)}
  c.rdt.needsUpdate=true;c.rdp.visible=true}
@@ -1315,5 +1333,141 @@ const o2=window.xUpd;window.xUpd=(dt,t,cx,cz)=>{if(o2)o2(dt,t,cx,cz);try{PKU(dt,
 markAll();blds.slice().forEach(b=>{try{bg.remove(b.g);addB(b)}catch(e){dbg(e)}});rebuild();
 })();
 
+</script>
+<script>
+/* ===== TAMBAHAN v3: edit jalan grid simetris, naik kereta pakai koin, kendaraan pemain (modul terpisah) ===== */
+(()=>{
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const H0=6.2;
+
+/* ---------- A. JALAN: tap kotak grid, lurus & simetris ---------- */
+let anchor=null,undo=[];
+const Wd=()=>Math.max(1,Math.min(5,Math.round(+$('brush').value)||2));
+const LO=w=>w%2?(w-1)/2:w/2,HI=w=>w%2?(w-1)/2:w/2-1;
+const cellOf=(v,w)=>w%2?{x:Math.floor(v.x),z:Math.floor(v.z)}:{x:Math.round(v.x),z:Math.round(v.z)};
+const lock=(a,b)=>Math.abs(b.x-a.x)>=Math.abs(b.z-a.z)?{x:b.x,z:a.z}:{x:a.x,z:b.z};
+const rect=(a,b,w)=>{const l=LO(w),h=HI(w);return{i0:Math.min(a.x,b.x)-l,i1:Math.max(a.x,b.x)+h,j0:Math.min(a.z,b.z)-l,j1:Math.max(a.z,b.z)+h}};
+function setRoad(i,j,t){if(!isLi(i,j))return 0;const c=gch(Math.floor(i/C),Math.floor(j/C),false);if(!c)return 0;const q=(j-c.cz*C)*C+(i-c.cx*C),o=c.rd[q];if(o===t)return 0;c.rd[q]=t;markDirty(i,j,1);return[i,j,o]}
+let prev=null;const mine=new Set(),roadAt=(i,j)=>rdAt(i,j)>0;
+function lay(a,b){const w=Wd(),t=+$('rsel').value,r=rect(a,b,w);if((r.i1-r.i0+1)*(r.j1-r.j0+1)>3000){toast('Terlalu panjang, pasang bertahap ya');return null}
+ const ch=[];for(let j=r.j0;j<=r.j1;j++)for(let i=r.i0;i<=r.i1;i++){const o=setRoad(i,j,t);if(o){ch.push(o);if(o[2]===0)mine.add(i+','+j)}}return ch}
+/* tikungan melengkung: busur tile konsentris di sudut luar (hanya tile yang baru dipasang di rangkaian ini) */
+function fillet(pv,e,e2,w,t,ch){
+ const d1={x:Math.sign(pv.e.x-pv.a.x),z:Math.sign(pv.e.z-pv.a.z)},d2={x:Math.sign(e2.x-e.x),z:Math.sign(e2.z-e.z)};
+ if((!d1.x&&!d1.z)||(!d2.x&&!d2.z)||(d1.x*d2.x+d1.z*d2.z)!==0)return 0;
+ const L1=Math.abs(pv.e.x-pv.a.x)+Math.abs(pv.e.z-pv.a.z)+w-(pv.rho||0),L2=Math.abs(e2.x-e.x)+Math.abs(e2.z-e.z)+w;
+ const rho=Math.min(2*w+1,Math.floor(L1),Math.floor(L2));if(rho<w+1)return 0;
+ const r=rect(e,e,w),X0=r.i0,X1=r.i1+1,Z0=r.j0,Z1=r.j1+1,Px=(d1.x-d2.x)>0?X1:X0,Pz=(d1.z-d2.z)>0?Z1:Z0;
+ for(let j=Math.floor(Pz-rho);j<Math.ceil(Pz+rho);j++)for(let i=Math.floor(Px-rho);i<Math.ceil(Px+rho);i++){
+  const rx=i+.5-Px,rz=j+.5-Pz,u=-(rx*d1.x+rz*d1.z),vv=rx*d2.x+rz*d2.z;if(u<0||vv<0||u>rho||vv>rho)continue;
+  const dd=Math.hypot(u-rho,vv-rho),want=dd<=rho&&dd>=rho-w,k=i+','+j,cur=roadAt(i,j);
+  if(want&&!cur){const o=setRoad(i,j,t);if(o){ch.push(o);mine.add(k)}}
+  else if(!want&&cur&&mine.has(k)){const o=setRoad(i,j,0);if(o){ch.push(o);mine.delete(k)}}}
+ return rho}
+const commit=ch=>{if(ch&&ch.length){undo.push(ch);if(undo.length>30)undo.shift();rebuild();save()}};
+function mkPlane(col,op){const g=new THREE.PlaneGeometry(1,1);g.rotateX(-Math.PI/2);const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}));m.visible=false;m.renderOrder=3;S.add(m);return m}
+const pvP=mkPlane(0x4aa3ff,.5),anP=mkPlane(0xffd23a,.65);
+const showRect=(m,r)=>{m.scale.set(r.i1-r.i0+1,1,r.j1-r.j0+1);m.position.set((r.i0+r.i1+1)/2,.47,(r.j0+r.j1+1)/2);m.visible=true};
+/* grid tile 1x1 khusus alat jalan */
+const gr=(()=>{const n=24,p=[];for(let a=-n;a<=n;a++)p.push(a,0,-n,a,0,n,-n,0,a,n,0,a);const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));const l=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.3,depthWrite:false,fog:false}));l.visible=false;S.add(l);return l})();
+const oldTap=PKH.tap;
+PKH.tap=v=>{
+ if(tool!=='jalan')return oldTap?oldTap(v):false;
+ const w=Wd(),c=cellOf(v,w);
+ if(!anchor){prev=null;mine.clear();const ch=lay(c,c);if(ch===null)return true;commit(ch);anchor=c;showRect(anP,rect(c,c,w));toast(ch.length?'Titik awal ✔ Tap kotak tujuan (jalan lurus mengikuti grid)':'Titik awal ✔ (belum ada daratan/sudah jalan di sini)');return true}
+ if(c.x===anchor.x&&c.z===anchor.z){anchor=null;prev=null;mine.clear();anP.visible=false;toast('Jalan selesai. Tap kotak untuk mulai jalan baru');return true}
+ const e=lock(anchor,c),t=+$('rsel').value,ch=lay(anchor,e);if(ch===null)return true;
+ let rho=0;if(prev)rho=fillet(prev,anchor,e,w,t,ch);
+ commit(ch);prev={a:anchor,e,rho};anchor=e;showRect(anP,rect(e,e,w));
+ toast(ch.length?(rho?'Jalan + tikungan melengkung ✔ ':'Jalan dipasang ✔ ')+'Tap lagi untuk lanjut / belok, tap titik terakhir = selesai':'Tidak ada yang berubah (bukan daratan atau sudah jalan)');return true};
+function pvUpd(e){if(mode!=='edit'||tool!=='jalan'||(e.pointerType!=='mouse'&&P.size>1)){pvP.visible=false;return}
+ const v=ground(e);if(!v){pvP.visible=false;return}const w=Wd(),c=cellOf(v,w);
+ if(anchor)showRect(pvP,rect(anchor,lock(anchor,c),w));else showRect(pvP,rect(c,c,w))}
+cv.addEventListener('pointermove',pvUpd);cv.addEventListener('pointerdown',pvUpd);
+cv.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse')pvP.visible=false});
+$('brush').addEventListener('input',()=>{if(tool==='jalan'){anchor=null;prev=null;mine.clear();anP.visible=false}});
+$('wl').insertAdjacentHTML('beforebegin','<button class="btn" id="rundo" style="display:none">↩️ Batal jalan</button>');
+$('rundo').onclick=()=>{const ch=undo.pop();if(!ch)return toast('Tidak ada yang dibatalkan');for(const[i,j,o]of ch)setRoad(i,j,o);prev=null;mine.clear();rebuild();save();toast('Jalan terakhir dibatalkan')};
+const hint0=hint;hint=function(){hint0();anchor=null;prev=null;mine.clear();anP.visible=false;pvP.visible=false;$('rundo').style.display=tool==='jalan'?'':'none'};
+
+/* ---------- B. NAIK KERETA PAKAI KOIN ---------- */
+const rb=document.createElement('button');rb.id='pkTr';rb.className='btn pri ui';
+rb.style.cssText='display:none;left:50%;transform:translateX(-50%);bottom:calc(var(--bh) + 190px + env(safe-area-inset-bottom,0px));z-index:9;padding:12px 18px;font-size:15px;max-width:86vw';
+document.body.appendChild(rb);
+let rKey='',rAct=null;rb.onclick=()=>{if(rAct)rAct()};
+function rShow(txt,fn,dis){const k=txt+(dis?'1':'0');if(k!==rKey){rKey=k;rb.textContent=txt;rb.disabled=!!dis;rb.style.opacity=dis?.65:1}rAct=dis?null:fn;rb.style.display='block'}
+const rHide=()=>{if(rKey!==''){rKey='';rb.style.display='none'}rAct=null};
+function findGround(x,z){for(let r=0;r<=28;r+=1.5){const n=r?Math.max(8,Math.round(r*3)):1;for(let k=0;k<n;k++){const a=k/n*6.2832,X=x+Math.cos(a)*r,Z=z+Math.sin(a)*r;if(wk(X,Z))return[X,Z]}}return null}
+const trainHere=(s,L)=>{const T=L.train;if(!T||!L.curve)return null;const ss=clamp(s.u*L.len,T.half,Math.max(T.half,L.len-T.half));return Math.abs(T.sc-ss)<1.5&&T.v<.4?T:null};
+function nearSt(x,z,line){let b=null,bd=1e9;for(const s of PKR.sts){const L=PKR.rails[s.l];if(!L||!L.curve||!s.grp)continue;if(line&&L!==line)continue;const d=Math.hypot(s.grp.position.x-x,s.grp.position.z-z);if(d<bd){bd=d;b={s,L,d}}}return b}
+function board(s,L){const T=L.train;if(!T)return;if(!trainHere(s,L))return toast('Kereta sudah jalan, tunggu yang berikutnya 🚆');
+ const hg=PKX.price('tiket');if(!PKX.spend(hg))return toast('Koin belum cukup 🪙 (tiket '+hg+')');
+ RIDE={L,T};rideY=H0-.2;T.hold=0;const tg=L.curve.getTangentAt(clamp(T.sc/L.len,0,1));yaw=Math.atan2(-tg.x*T.dir,-tg.z*T.dir);pit=-.12;
+ toast('🚆 Naik kereta di '+s.n+(hg?' · -'+hg+' 🪙':' · gratis'))}
+window.rideSync=()=>{const R=RIDE;if(!R)return;const L=R.L,T=R.T;if(!PKR.rails.includes(L)||L.train!==T||!L.curve){endRide();toast('Jalur kereta berubah, kamu diturunkan');return}
+ const p=L.curve.getPointAt(clamp(T.sc,0,L.len)/L.len);px=p.x;pz=p.z}
+function endRide(p){RIDE=null;rideY=0;if(!p)p=findGround(px,pz);if(p){px=p[0];pz=p[1]}else{const r={};spawn(r);px=r.x;pz=r.z}if(me){me.x=px;me.z=pz;me.tx=null}}
+function alight(){const R=RIDE;if(!R)return;const n=nearSt(px,pz,R.L);let p=null;
+ if(n&&n.d<8){const g=n.s.grp,r=g.rotation.y,c=Math.cos(r),sn=Math.sin(r),X=g.position.x+2*c+15.5*sn,Z=g.position.z-2*sn+15.5*c;if(wk(X,Z))p=[X,Z]}
+ if(!p)p=findGround(px,pz);if(!p)return toast('Belum ada daratan di dekat sini. Tunggu stasiun berikutnya 🚉');
+ endRide(p);toast('Turun'+(n&&n.d<8?' di '+n.s.n:'')+' ✅')}
+const sm0=setMode;setMode=function(m){if(RIDE&&m!=='pov')endRide();return sm0(m)};
+let wasStop=false;
+function trainUI(dt){
+ for(const L of PKR.rails){const T=L.train;if(T&&T.v>.6)T.hold=0}
+ if(mode!=='pov'||inside){if(RIDE)endRide();rHide();return}
+ if(RIDE){const T=RIDE.T,stop=T.v<.4,n=nearSt(px,pz,RIDE.L);
+  if(stop){if(n&&n.d<8&&T.wait>0&&T.wait<1&&(T.hold||0)<4){T.wait=1;T.hold=(T.hold||0)+dt}
+   if(!wasStop&&n&&n.d<8)toast('🚉 Tiba di '+n.s.n);rShow('⬇️ Turun'+(n&&n.d<8?' di '+n.s.n:''),alight)}
+  else rHide();wasStop=stop;return}
+ wasStop=false;
+ const n=nearSt(px,pz);if(!n||n.d>13||!n.L.train){rHide();return}
+ const T=trainHere(n.s,n.L);
+ if(T){if(T.wait>0&&T.wait<1.2&&(T.hold||0)<15){T.wait=1.2;T.hold=(T.hold||0)+dt}rShow('🚆 Naik kereta · 🪙 '+PKX.price('tiket'),()=>board(n.s,n.L))}
+ else rShow('⏳ Menunggu kereta di '+n.s.n,null,true)}
+
+/* ---------- C. KENDARAAN PEMAIN ---------- */
+const VG2=new THREE.Group();S.add(VG2);let vm=null,vk='',vh=0;
+function wl(g,x,y,z,r,wd){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,wd||.12,10),M(0x15171a));m.rotation.z=Math.PI/2;m.position.set(x,y,z);m.castShadow=true;g.add(m)}
+function mkV(k){const g=new THREE.Group(),gl=0x9ccbe6,hl=[];let hs=[];
+ if(k==='sepeda'){const c=0x2f6fd0;wl(g,0,.17,.38,.17,.05);wl(g,0,.17,-.38,.17,.05);bx(g,.05,.05,.8,c,0,.3,0);bx(g,.05,.24,.05,c,0,.2,-.1);bx(g,.04,.3,.04,0x333333,0,.2,.38);bx(g,.34,.04,.04,0x333333,0,.52,.38);bx(g,.12,.05,.18,0x222222,0,.46,-.14);hs=[[0,.45,.42]]}
+ else if(k==='motor'){const c=0xd84a3a;wl(g,0,.19,.44,.19,.1);wl(g,0,.19,-.44,.19,.1);bx(g,.22,.2,.7,c,0,.22,0);bx(g,.2,.12,.3,0x222222,0,.42,.12);bx(g,.2,.06,.36,0x222222,0,.42,-.2);bx(g,.06,.4,.06,0x888888,0,.2,.44);bx(g,.4,.05,.05,0x333333,0,.62,.42);bx(g,.12,.12,.06,0xfff2c0,0,.48,.5);hs=[[0,.52,.54]]}
+ else if(k==='mobil'){const c=0xf2c230;for(const x of[-.42,.42])for(const z of[-.58,.58])wl(g,x,.18,z,.18,.14);bx(g,.84,.3,1.8,c,0,.14,0);bx(g,.74,.3,1.0,gl,0,.44,-.1);bx(g,.76,.05,1.02,c,0,.74,-.1);bx(g,.86,.1,.08,0x333333,0,.14,.92);for(const x of[-.28,.28])bx(g,.18,.1,.04,0xfff2c0,x,.3,.91);hs=[[-.28,.35,.96],[.28,.35,.96]]}
+ else if(k==='jip'){const c=0x3aa06a;for(const x of[-.5,.5])for(const z of[-.62,.62])wl(g,x,.25,z,.25,.18);bx(g,.95,.42,1.9,c,0,.22,0);bx(g,.9,.42,1.05,gl,0,.64,-.2);bx(g,.92,.06,1.08,0x2a2f36,0,1.06,-.2);bx(g,.98,.1,.08,0x333333,0,.24,.97);for(const x of[-.3,.3])bx(g,.2,.12,.04,0xfff2c0,x,.4,.96);hs=[[-.3,.45,1.0],[.3,.45,1.0]]}
+ else{const c=0xe8a020;for(const x of[-.58,.58])for(const z of[-1.15,1.15])wl(g,x,.24,z,.24,.16);bx(g,1.2,.95,3.6,c,0,.22,0);bx(g,1.22,.34,3.2,gl,0,.7,0);bx(g,1.2,.06,3.6,0xeeeeee,0,1.17,0);bx(g,1.0,.4,.06,gl,0,.62,1.81);for(const x of[-.4,.4])bx(g,.2,.12,.04,0xfff2c0,x,.34,1.82);hs=[[-.4,.4,1.9],[.4,.4,1.9]]}
+ g.userData.hl=hs.map(a=>{const s=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,opacity:.9}));s.scale.set(.9,.9,1);s.position.set(a[0],a[1],a[2]);s.visible=false;g.add(s);return s});
+ g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g}
+function vehUpd(dt){const want=(mode==='pov'&&!inside&&!RIDE&&VEH)?VEH:'';
+ if(want!==vk){if(vm)VG2.remove(vm);vm=want?mkV(want):null;if(vm){VG2.add(vm);vh=Math.atan2(-Math.sin(yaw),-Math.cos(yaw))}vk=want}
+ if(vm){if(pvMv){const da=((pvRot-vh+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;vh+=da*Math.min(1,dt*10)}vm.position.set(px,.3,pz);vm.rotation.y=vh;for(const s of vm.userData.hl)s.visible=night}}
+window.PKV={refresh(){}};
+
+/* ---------- D. KENDARAAN TERLIHAT SEMUA PEMAIN ---------- */
+let VEHS={},RV={},sentV=null,sentVT=0,sendingV=0;
+async function pullVeh(){try{const r=await fetch(API+'kendaraan_pulau?select=id,veh',{headers:H});if(!r.ok)return;VEHS=Object.fromEntries((await r.json()).map(x=>[String(x.id),x.veh]))}catch(e){}}
+async function sendVeh(k){sendingV=1;try{const r=await fetch(RPC+'set_kendaraan',{method:'POST',headers:H,body:JSON.stringify({p_id:String(me.id),p_veh:k})});if(r.ok)sentV=k;else sentVT=Date.now()+56000}catch(e){sentVT=Date.now()+56000}sendingV=0}
+const VOK={sepeda:1,motor:1,mobil:1,jip:1,bus:1};
+function vehOthers(dt,cx,cz){
+ VG2.visible=!inside;
+ if(me&&!sendingV&&VEH!==sentV&&Date.now()-sentVT>4000){sentVT=Date.now();sendVeh(VEH)}
+ const seen=new Set();
+ if(!inside)for(const r of res){if(r.seed||!r.g)continue;const id=String(r.id),own=me&&id===String(me.id),k=own?(mode==='pov'?'':VEH):VEHS[id];
+  if(!k||!VOK[k]||Math.hypot(r.x-cx,r.z-cz)>60)continue;
+  let o=RV[id];if(o&&o.k!==k){VG2.remove(o.g);delete RV[id];o=null}
+  if(!o){o=RV[id]={k,g:mkV(k),x:r.x,z:r.z,h:Math.random()*6.28};VG2.add(o.g)}
+  seen.add(id);const dx=r.x-o.x,dz=r.z-o.z;
+  if(dx*dx+dz*dz>1e-6){const da=((Math.atan2(dx,dz)-o.h+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;o.h+=da*Math.min(1,dt*8)}
+  o.x=r.x;o.z=r.z;o.g.position.set(r.x,.3,r.z);o.g.rotation.y=o.h;for(const s of o.g.userData.hl)s.visible=night;
+  if(k==='mobil'||k==='jip'||k==='bus')r.g.visible=false;else r.g.position.y+=.24;
+  if(r.lg){r.lg[0].rotation.x=r.lg[1].rotation.x=0}if(r.ar){r.ar[0].rotation.x=r.ar[1].rotation.x=0}}
+ for(const id in RV)if(!seen.has(id)){VG2.remove(RV[id].g);delete RV[id]}}
+pullVeh();setInterval(pullVeh,10000);
+
+/* ---------- loop ---------- */
+const o4=window.xUpd;
+window.xUpd=(dt,t,cx,cz)=>{if(o4)o4(dt,t,cx,cz);try{
+ const on=mode==='edit'&&tool==='jalan';gr.visible=on;if(on)gr.position.set(Math.round(tgt.x),.37,Math.round(tgt.z));else{pvP.visible=false;anP.visible=false}
+ trainUI(dt);vehUpd(dt);vehOthers(dt,cx,cz)}catch(e){dbg(e)}};
+})();
 </script>
 </body></html>
