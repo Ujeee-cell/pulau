@@ -490,14 +490,14 @@ if(o.isMesh&&o.geometry.type==='BoxGeometry'&&o.material!==WM&&!o.rotation.x&&!o
 if(h>=.9&&h<=6&&w>=.8&&d>=.8&&y0<.45&&o.scale.x===1){nw++;const c=o.material.color,dk=c.clone().offsetHSL(0,0,-.07).getHex(),lt=c.clone().offsetHSL(0,0,.12).getHex();
 bx(g,w+.05,.12,d+.05,dk,x,y0,z);bx(g,w+.1,.07,d+.1,lt,x,y0+h-.07,z);
 for(let y=y0+.3;y<y0+h-.15;y+=.22)bx(g,w+.02,.022,d+.02,dk,x,y,z);
-if(h>=1.5&&w>=1.2&&H>.55){const by=y0+h*.52,zf=z+d/2;bx(g,w*.55,.05,.38,0xc8c2b4,x,by,zf+.17);bx(g,w*.55,.04,.03,0x5a5a60,x,by+.3,zf+.35);for(const t of[-1,0,1])bx(g,.03,.3,.03,0x5a5a60,x+t*w*.27,by,zf+.35)}}}
+}}
 else if(o.isGroup||o.isMesh){const m=o.isGroup?o.children[0]:o,gm=m&&m.geometry;if(gm&&gm.type==='CylinderGeometry'&&gm.parameters.radialSegments===4&&gm.parameters.radiusTop===0){const bb=tbb(o),sz=bb.getSize(new THREE.Vector3()),cx=(bb.min.x+bb.max.x)/2,cz=(bb.min.z+bb.max.z)/2;
 if(sz.x>.5&&sz.y>.2&&sz.x<12){const c=m.material.color,dk=c.clone().offsetHSL(0,0,-.08).getHex();bx(g,sz.x+.05,.06,sz.z+.05,0x4a3020,cx,bb.min.y-.04,cz);for(let i=1;i<=3;i++){const f=i/4;bx(g,sz.x*(1-f)+.06,.03,sz.z*(1-f)+.06,dk,cx,bb.min.y+f*sz.y-.02,cz)}cy(g,.045,.02,.2,0x5a3a22,cx,bb.max.y-.02,cz,5);if(!ch&&H>.45&&sz.x>1.6&&sz.y>.4){ch=1;const y1=bb.min.y+sz.y*.3;bx(g,.24,sz.y*.3+.4,.24,0x9a4a3a,cx+sz.x*.2,y1,cz-sz.z*.15);bx(g,.32,.06,.32,0x444444,cx+sz.x*.2,y1+sz.y*.3+.4,cz-sz.z*.15)}}}}}}
 function detailB(g,b){const bb=tbb(g),w=bb.max.x-bb.min.x,d=bb.max.z-bb.min.z,cx=(bb.max.x+bb.min.x)/2,cz=(bb.max.z+bb.min.z)/2;if(w<.8||d<.8||w>14||d>14||bb.max.y<.9)return;
 bx(g,w+.14,.1,d+.14,0x8f8b82,cx,0,cz);
 detail2(g,b,bb,w,d,cx,cz);detail3(g,b)}
 function bigDet(g){const bb=tbb(g),w=bb.max.x-bb.min.x,d=bb.max.z-bb.min.z;if(w<1||d<1||w>14||bb.max.y<.9)return;const cx=(bb.max.x+bb.min.x)/2,zf=bb.max.z;
-bx(g,w*1.02,.05,.07,0xb8b2a4,0,Math.min(bb.max.y*.5,1.1),bb.max.z+.01);
+
 }
 function addB(b){const c=CAT[b.i],g=new THREE.Group(),ig=new THREE.Group();g.add(ig);(U[c[0]]||B[c[1]])(ig,c[2]);if(isBig(c))try{detailB(ig,b);bigDet(ig)}catch(e){dbg(e)}try{PKH.pre&&PKH.pre(ig,b)}catch(e){dbg(e)}try{mergeGroup(ig)}catch(e){dbg(e)}if(isBig(c))ig.scale.setScalar(BS);g.position.set(b.x,.3,b.z);g.rotation.y=(b.r||0)*Math.PI/4;b.h=new THREE.Box3().setFromObject(g).max.y-.3;b.g=g;
  b.lit=!!c[2].lamp;if(b.lit){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,opacity:.5})),z=c[2].lamp?3.2:c[3]*2.6+1.5;s.scale.set(z,z,1);s.position.y=c[2].lamp?b.h-.2:Math.min(b.h*.5,1.4);s.visible=false;g.add(s);b.gl=s}
