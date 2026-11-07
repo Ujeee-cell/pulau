@@ -1082,7 +1082,7 @@ setInterval(async()=>{if(document.hidden)return;const a=await vnList();if(!a||!a
 const mine=r=>me&&String(r.vid)===String(me.id);
 function draw(){const t=L.slice(0,5).map((r,i)=>'<div class="'+(mine(r)?'m':'')+'">'+['🥇','🥈','🥉','4.','5.'][i]+' '+esc(r.nama||'?')+' · 🪙'+r.koin+'</div>').join('');
 el.innerHTML='<div><b>🏆 Koin terbanyak</b></div>'+(ok&&L.length?t:'<div style="opacity:.7">'+(ok?'Belum ada data':'Belum aktif (jalankan SQL)')+'</div>')}
-async function pull(){try{const r=await fetch(API+'koin_pulau?select=vid,nama,koin&koin=gt.0&order=koin.desc,vid.asc&limit=5&_='+Date.now(),{headers:{...H,'Cache-Control':'no-cache'},cache:'no-store'});if(!r.ok)throw r.status;L=await r.json();ok=true}catch(e){ok=false;console.warn('Leaderboard gagal dimuat:',e)}draw()}
+async function pull(){try{const r=await fetch(API+'koin_pulau?select=vid,nama,koin&order=koin.desc&limit=5',{headers:H,cache:'no-store'});if(!r.ok)throw r.status;L=await r.json();ok=true}catch(e){ok=false;console.warn('Leaderboard gagal dimuat:',e)}draw()}
 let sending=false;
 async function send(force){if(!me||!window.PKX||sending)return;const c=PKX.get();if(!force&&c===lastSent)return;sending=true;try{const r=await fetch(RPC+'set_koin',{method:'POST',keepalive:true,headers:H,body:JSON.stringify({p_vid:String(me.id),p_nama:me.n,p_koin:c})});if(r.ok){lastSent=c;pull()}else console.warn('set_koin gagal',r.status,await r.text().catch(()=>''))}catch(e){console.warn('set_koin error',e)}sending=false}
 window.PKLB={send:()=>send(true),pull};
