@@ -1080,13 +1080,16 @@ setInterval(async()=>{if(document.hidden)return;const a=await vnList();if(!a||!a
 <script>
 (()=>{const el=document.createElement('div');el.id='pkl';el.className='ui';document.body.appendChild(el);let L=[],ok=false,lastSent=-1,lastT=0;
 const mine=r=>me&&String(r.vid)===String(me.id);
-function draw(){const t=L.slice(0,3).map((r,i)=>'<div class="'+(mine(r)?'m':'')+'">'+['🥇','🥈','🥉'][i]+' '+esc(r.nama||'?')+' · 🪙'+r.koin+'</div>').join('');
+function draw(){const t=L.slice(0,5).map((r,i)=>'<div class="'+(mine(r)?'m':'')+'">'+['🥇','🥈','🥉','4.','5.'][i]+' '+esc(r.nama||'?')+' · 🪙'+r.koin+'</div>').join('');
 el.innerHTML='<div><b>🏆 Koin terbanyak</b></div>'+(ok&&L.length?t:'<div style="opacity:.7">'+(ok?'Belum ada data':'Belum aktif (jalankan SQL)')+'</div>')}
-async function pull(){try{const r=await fetch(API+'koin_pulau?select=vid,nama,koin&order=koin.desc&limit=10',{headers:H});if(!r.ok)throw 0;L=await r.json();ok=true}catch(e){ok=false}draw()}
-async function send(){if(!me||!window.PKX)return;const c=PKX.get();if(c===lastSent||Date.now()-lastT<12000)return;lastT=Date.now();try{const r=await fetch(RPC+'set_koin',{method:'POST',headers:H,body:JSON.stringify({p_vid:String(me.id),p_nama:me.n,p_koin:c})});if(r.ok){lastSent=c;pull()}}catch(e){}}
+async function pull(){try{const r=await fetch(API+'koin_pulau?select=vid,nama,koin&koin=gt.0&order=koin.desc,vid.asc&limit=5&_='+Date.now(),{headers:{...H,'Cache-Control':'no-cache'},cache:'no-store'});if(!r.ok)throw r.status;L=await r.json();ok=true}catch(e){ok=false;console.warn('Leaderboard gagal dimuat:',e)}draw()}
+let sending=false;
+async function send(force){if(!me||!window.PKX||sending)return;const c=PKX.get();if(!force&&c===lastSent)return;sending=true;try{const r=await fetch(RPC+'set_koin',{method:'POST',keepalive:true,headers:H,body:JSON.stringify({p_vid:String(me.id),p_nama:me.n,p_koin:c})});if(r.ok){lastSent=c;pull()}else console.warn('set_koin gagal',r.status,await r.text().catch(()=>''))}catch(e){console.warn('set_koin error',e)}sending=false}
+window.PKLB={send:()=>send(true),pull};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)send()});addEventListener('pagehide',()=>send());
 el.onclick=()=>{const rows=L.map((r,i)=>'<div class="row" style="justify-content:space-between;margin:3px 0;'+(mine(r)?'font-weight:700;color:var(--ac)':'')+'"><span>'+(i+1)+'. '+esc(r.nama||'?')+'</span><span>🪙 '+r.koin+'</span></div>').join('');
-modal({t:'🏆 Top 10 koin',txt:(ok?rows||'Belum ada data.':'Papan peringkat belum aktif. Jalankan pulau-tambahan.sql di Supabase.')+(me?'':'<small>Daftar jadi warga supaya kamu masuk peringkat.</small>'),ok:'Tutup',nocl:1,cb:()=>{}})};
-draw();pull();setInterval(pull,25000);setInterval(send,6000);
+modal({t:'🏆 Top 5 koin',txt:(ok?rows||'Belum ada data.':'Papan peringkat belum aktif. Jalankan pulau-tambahan.sql di Supabase.')+(me?'':'<small>Daftar jadi warga supaya kamu masuk peringkat.</small>'),ok:'Tutup',nocl:1,cb:()=>{}})};
+draw();pull();setInterval(pull,15000);setInterval(send,4000);setTimeout(()=>send(true),2500);
 (()=>{const r=document.documentElement,bar=document.getElementById('bar'),sh=document.getElementById('sheet'),f=()=>{r.style.setProperty('--bh',bar.offsetHeight+'px');r.style.setProperty('--sh',(sh.style.display==='block'?sh.offsetHeight:0)+'px')};try{new ResizeObserver(f).observe(bar);new ResizeObserver(f).observe(sh)}catch(e){}addEventListener('resize',f);setInterval(f,600);f();document.body.appendChild(document.getElementById('bR'))})();
 })();
 </script>
