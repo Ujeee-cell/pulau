@@ -863,8 +863,9 @@ function rebuild(cx,cz){cs.forEach(c=>G.remove(c.m));cs=[];const sl=slotN(),e=cu
 for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const X=Math.floor(cx/20)+a,Z=Math.floor(cz/20)+b;
 for(let i=0;i<n;i++){const h1=hash(X*13.1+i*7.7+sl*.37,Z*9.3+i*3.1+sl*.011),h2=hash(X*5.5+i*1.9+sl*.07,Z*17.7+i*4.3+sl*.19),x=X*20+h1*20,z=Z*20+h2*20,id=sl+':'+X+','+Z+':'+i;if(col.has(id)||!wkOK(x,z))continue;addC(id,x,z,hash(h1*99,h2*77)<.1*e.gd?1:0)}
 if(0&&e.tr&&hash(X*3.3+sl,Z*2.2)<.4){const x=X*20+hash(X,sl)*20,z=Z*20+hash(Z,sl)*20,id=sl+':T'+X+','+Z;if(!col.has(id)&&wkOK(x,z))addC(id,x,z,2)}}}
-function collect(c){G.remove(c.m);cs=cs.filter(q=>q!==c);st.col.ids.push(c.id);const e=cur(),v=Math.round([1,5,50][c.t]*e.m*(mnt()<10?2:1));add(v);prog('coin',1);toast((c.t==2?'🏴‍☠️ Peti harta! +':'🪙 +')+v)}
-function add(n){st.c+=n;st.tot+=n;sv();chip();badge()}
+function collect(c){if(!me){needReg();return}G.remove(c.m);cs=cs.filter(q=>q!==c);st.col.ids.push(c.id);const e=cur(),v=Math.round([1,5,50][c.t]*e.m*(mnt()<10?2:1));add(v);prog('coin',1);toast((c.t==2?'🏴‍☠️ Peti harta! +':'🪙 +')+v)}
+window.needReg=()=>{toast('Daftar jadi warga dulu supaya bisa kumpulin koin 🪙')};
+function add(n){if(!me){needReg();return}st.c+=n;st.tot+=n;sv();chip();badge()}
 /* --- peliharaan, aura, kembang api --- */
 function emo(ch){const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.font='48px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(ch,32,34);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true}));s.scale.set(.9,.9,1);return s}
 let petS=null,petK='',aura=null;
@@ -951,9 +952,9 @@ hubE.innerHTML='<div class="cd"><div class="tb">'+T.map(q=>'<button class="btn'+
 async function launch(o){let ok=0;try{const r=await fetch(RPC+'set_event',{method:'POST',headers:H,body:JSON.stringify({p_pin:adminPin,p_data:o})});ok=r.ok}catch(e){}if(ok){gEv=o;st.lo=null}else{st.lo=o.until?o:null;toast('Tabel event belum ada — jalankan SQL. Event ini cuma di HP kamu.')}ck0='';sv();chip();hub()}
 hubE.onclick=async x=>{if(x.target===hubE)return hubE.style.display='none';const b=x.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v,d=dayN(),e=cur();
 if(a==='x')hubE.style.display='none';else if(a==='t')hub(v);
-else if(a==='ci'){const n=st.ld===d-1?st.sk+1:1;st.sk=n;st.ld=d;add(RW[(n-1)%7]);toast('📅 Absen hari ke-'+n+' ✅');hub()}
-else if(a==='hr'){st.hs=slotN();add(10*e.hr);prog('hr',1);toast('⏰ Hadiah jam-an +'+10*e.hr+' 🪙');hub()}
-else if(a==='mc'){const m=ms().find(q=>q.k===v);if(m&&(st.m.p[m.k]||0)>=m.n&&!st.m.r[m.k]){st.m.r[m.k]=1;add(m.rw);toast('✅ Misi selesai! +'+m.rw+' 🪙');if(ms().every(q=>st.m.r[q.k])&&!st.m.b){st.m.b=1;add(40);toast('🏆 Semua misi beres! Bonus +40 🪙')}}hub()}
+else if(a==='ci'){if(!me)return needReg();const n=st.ld===d-1?st.sk+1:1;st.sk=n;st.ld=d;add(RW[(n-1)%7]);toast('📅 Absen hari ke-'+n+' ✅');hub()}
+else if(a==='hr'){if(!me)return needReg();st.hs=slotN();add(10*e.hr);prog('hr',1);toast('⏰ Hadiah jam-an +'+10*e.hr+' 🪙');hub()}
+else if(a==='mc'){if(!me)return needReg();const m=ms().find(q=>q.k===v);if(m&&(st.m.p[m.k]||0)>=m.n&&!st.m.r[m.k]){st.m.r[m.k]=1;add(m.rw);toast('✅ Misi selesai! +'+m.rw+' 🪙');if(ms().every(q=>st.m.r[q.k])&&!st.m.b){st.m.b=1;add(40);toast('🏆 Semua misi beres! Bonus +40 🪙')}}hub()}
 else if(a==='buy'){const i=IT[v];const hg=pr(v);if(st.c<hg)return toast('Koin belum cukup 🪙');if(i[3]==='put'){if(await put(v)){st.c-=hg;sv()}}else{st.c-=hg;if(i[3]==='use')st.inv.kembang=(st.inv.kembang||0)+1;else{st.own[v]=1;if(i[3]==='pet')st.eq.pet=v;else if(i[3]==='veh'){st.eq.veh=v;vehSet()}else st.eq.aura=1}sv();toast('Dibeli '+i[0])}chip();hub()}
 else if(a==='eq'){if(IT[v][3]==='pet')st.eq.pet=st.eq.pet===v?'':v;else if(IT[v][3]==='veh'){st.eq.veh=st.eq.veh===v?'':v;vehSet()}else st.eq.aura=st.eq.aura?0:1;sv();hub()}
 else if(a==='fw'){if(st.inv.kembang>0){const[x0,z0]=pos();st.inv.kembang--;sv();fw(x0,z0);hubE.style.display='none'}}
@@ -1011,8 +1012,8 @@ const JB=[['mancing','🎣 Mancing','Tunggu ikan, tarik pas dia gigit'],['tanam'
 function jpR(){jp.innerHTML='<div class="h"><b>💼 Kerja · 5 🪙 tiap selesai</b><button class="btn" id="jx">✕</button></div>'+JB.map(([k,n,d])=>'<div class="rw" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd)"><div><b>'+n+'</b><small style="display:block;opacity:.7">'+d+'</small></div>'+(rdy(k)?'<button class="btn pri" data-j="'+k+'">Kerja</button>':'<small>'+left(k)+' mnt lagi</small>')+'</div>').join('')+(admin?'<button class="btn" id="jf">🔥 Tes kebakaran (admin)</button>':'');
 $('jx').onclick=()=>jp.style.display='none';if($('jf'))$('jf').onclick=()=>{jp.style.display='none';startFire(true)};
 jp.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>({mancing:fish,tanam:plant,sapa:sapaGo,api:()=>{jp.style.display='none';toast(F?'Tekan 🧯 Semprot di layar!':'Belum ada kebakaran 🙂')}})[b.dataset.j]())}
-$('bJ').onclick=()=>{vp.style.display='none';if(jp.style.display==='flex')jp.style.display='none';else{jpR();jp.style.display='flex'}};
-function done(k){jb[k]=Date.now();svj();try{PKX.add(5)}catch(e){}toast('✅ Selesai kerja! +5 🪙');coinSfx();mgc()}
+$('bJ').onclick=()=>{if(!me)return needReg();vp.style.display='none';if(jp.style.display==='flex')jp.style.display='none';else{jpR();jp.style.display='flex'}};
+function done(k){if(!me){needReg();return}jb[k]=Date.now();svj();try{PKX.add(5)}catch(e){}toast('✅ Selesai kerja! +5 🪙');coinSfx();mgc()}
 function fish(){jp.style.display='none';let c=0,tm;const set=(h,b,fn)=>{mgb.innerHTML='<h3>🎣 Mancing</h3><p>Ikan: '+c+'/3 · tunggu sampai muncul ❗ baru tarik!</p><div style="font-size:54px;text-align:center">'+h+'</div><div class="row"><button class="btn pri" id="mA">'+b+'</button><button class="btn" id="mX">Batal</button></div>';$('mA').onclick=fn;$('mX').onclick=()=>{clearTimeout(tm);mgc()}};
 const wait=()=>{set('🌊','Tarik!',()=>{clearTimeout(tm);toast('Terlalu cepat, ikan kabur 😅');note(200,.2,'sawtooth',.08);wait()});tm=setTimeout(()=>{note(880,.15,'sine',.1);set('❗🐟','TARIK!',()=>{clearTimeout(tm);c++;note(520,.2,'triangle',.12,1040);if(c>=3)done('mancing');else{toast('Dapat ikan! 🐟');wait()}});tm=setTimeout(()=>{toast('Ikan lepas…');wait()},900)},1500+Math.random()*2500)};mgo();wait()}
 function plant(){jp.style.display='none';let s=0,p=0,iv;const T=['Cangkul tanah (TAHAN tombol)','Tabur benih (geser slider sampai ujung)','Siram tanaman (TAHAN tombol)'],I=['⛏️','🌰','💧'];
@@ -1079,16 +1080,17 @@ setInterval(async()=>{if(document.hidden)return;const a=await vnList();if(!a||!a
 </script>
 <script>
 (()=>{const el=document.createElement('div');el.id='pkl';el.className='ui';document.body.appendChild(el);let L=[],ok=false,lastSent=-1,lastT=0;
-const mine=r=>me&&String(r.vid)===String(me.id);
+const gid=(()=>{try{let g=localStorage.getItem('pk-gid');if(!g){g='tamu-'+Math.random().toString(36).slice(2,8);localStorage.setItem('pk-gid',g)}return g}catch(e){return 'tamu-'+Math.random().toString(36).slice(2,8)}})();const myVid=()=>me?String(me.id):gid,myNama=()=>me?me.n:'Tamu '+gid.slice(-4);
+const mine=r=>String(r.vid)===myVid();
 function draw(){const t=L.slice(0,5).map((r,i)=>'<div class="'+(mine(r)?'m':'')+'">'+['🥇','🥈','🥉','4.','5.'][i]+' '+esc(r.nama||'?')+' · 🪙'+r.koin+'</div>').join('');
 el.innerHTML='<div><b>🏆 Koin terbanyak</b></div>'+(ok&&L.length?t:'<div style="opacity:.7">'+(ok?'Belum ada data':'Belum aktif (jalankan SQL)')+'</div>')}
 async function pull(){try{const r=await fetch(API+'koin_pulau?select=vid,nama,koin&order=koin.desc&limit=5',{headers:H,cache:'no-store'});if(!r.ok)throw r.status;L=await r.json();ok=true}catch(e){ok=false;console.warn('Leaderboard gagal dimuat:',e)}draw()}
 let sending=false;
-async function send(force){if(!me||!window.PKX||sending)return;const c=PKX.get();if(!force&&c===lastSent)return;sending=true;try{const r=await fetch(RPC+'set_koin',{method:'POST',keepalive:true,headers:H,body:JSON.stringify({p_vid:String(me.id),p_nama:me.n,p_koin:c})});if(r.ok){lastSent=c;pull()}else console.warn('set_koin gagal',r.status,await r.text().catch(()=>''))}catch(e){console.warn('set_koin error',e)}sending=false}
+async function send(force){if(!me||!window.PKX||sending)return;const c=PKX.get();if(!force&&c===lastSent)return;sending=true;try{const r=await fetch(RPC+'set_koin',{method:'POST',keepalive:true,headers:H,body:JSON.stringify({p_vid:myVid(),p_nama:myNama(),p_koin:c})});if(r.ok){lastSent=c;pull()}else{console.warn('set_koin gagal',r.status);if(!send.w){send.w=1;try{toast('Koin gagal tersimpan ke papan peringkat ('+r.status+')')}catch(e){}}}}catch(e){console.warn('set_koin error',e);if(!send.w){send.w=1;try{toast('Koin gagal tersimpan ke papan peringkat (jaringan)')}catch(e2){}}}sending=false}
 window.PKLB={send:()=>send(true),pull};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)send()});addEventListener('pagehide',()=>send());
 el.onclick=()=>{const rows=L.map((r,i)=>'<div class="row" style="justify-content:space-between;margin:3px 0;'+(mine(r)?'font-weight:700;color:var(--ac)':'')+'"><span>'+(i+1)+'. '+esc(r.nama||'?')+'</span><span>🪙 '+r.koin+'</span></div>').join('');
-modal({t:'🏆 Top 5 koin',txt:(ok?rows||'Belum ada data.':'Papan peringkat belum aktif. Jalankan pulau-tambahan.sql di Supabase.')+(me?'':'<small>Daftar jadi warga supaya kamu masuk peringkat.</small>'),ok:'Tutup',nocl:1,cb:()=>{}})};
+modal({t:'🏆 Top 5 koin',txt:(ok?rows||'Belum ada data.':'Papan peringkat belum aktif. Jalankan pulau-tambahan.sql di Supabase.')+(me?'':'<small>Daftar jadi warga dulu supaya bisa kumpulin koin dan masuk peringkat.</small>'),ok:'Tutup',nocl:1,cb:()=>{}})};
 draw();pull();setInterval(pull,15000);setInterval(send,4000);setTimeout(()=>send(true),2500);
 (()=>{const r=document.documentElement,bar=document.getElementById('bar'),sh=document.getElementById('sheet'),f=()=>{r.style.setProperty('--bh',bar.offsetHeight+'px');r.style.setProperty('--sh',(sh.style.display==='block'?sh.offsetHeight:0)+'px')};try{new ResizeObserver(f).observe(bar);new ResizeObserver(f).observe(sh)}catch(e){}addEventListener('resize',f);setInterval(f,600);f();document.body.appendChild(document.getElementById('bR'))})();
 })();
