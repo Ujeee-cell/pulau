@@ -1439,7 +1439,7 @@ const rHide=()=>{if(rKey!==''){rKey='';rb.style.display='none'}rAct=null};
 function findGround(x,z){for(let r=0;r<=28;r+=1.5){const n=r?Math.max(8,Math.round(r*3)):1;for(let k=0;k<n;k++){const a=k/n*6.2832,X=x+Math.cos(a)*r,Z=z+Math.sin(a)*r;if(wk(X,Z))return[X,Z]}}return null}
 const trainHere=(s,L)=>{const T=L.train;if(!T||!L.curve)return null;const ss=clamp(s.u*L.len,T.half,Math.max(T.half,L.len-T.half));return Math.abs(T.sc-ss)<1.5&&T.v<.4?T:null};
 /* sinyal persimpangan: 2 jalur yang bertemu di satu titik tidak boleh dilewati 2 kereta sekaligus */
-let ZN=[],ZK='';const SIGG=new THREE.Group();RG2.add(SIGG);const SR=new THREE.MeshBasicMaterial({color:0xff3b30}),SG=new THREE.MeshBasicMaterial({color:0x34c759});
+let ZN=[],ZK='';const SIGG=new THREE.Group();S.add(SIGG);const SR=new THREE.MeshBasicMaterial({color:0xff3b30}),SG=new THREE.MeshBasicMaterial({color:0x34c759});
 const trPos=L=>{const T=L&&L.train;if(!T||!L.curve)return null;return L.curve.getPointAt(clamp(T.sc,0,L.len)/L.len)};
 function sigZones(){const R=PKR.rails,z=[];for(let i=0;i<R.length;i++)for(let j=i+1;j<R.length;j++)for(const a of R[i].p)for(const b of R[j].p)if(Math.hypot(a[0]-b[0],a[1]-b[1])<.05&&!z.some(q=>q.a===i&&q.b===j&&Math.hypot(q.x-a[0],q.z-a[1])<.1))z.push({x:a[0],z:a[1],a:i,b:j});
  const key=z.map(q=>q.x+','+q.z+','+q.a+','+q.b).join(';');ZN=z;if(key!==ZK){ZK=key;while(SIGG.children.length){const c=SIGG.children.pop();c.geometry&&c.geometry.dispose()}
