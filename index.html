@@ -864,7 +864,22 @@ for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const X=Math.floor(cx/20)+a,Z=Math.
 for(let i=0;i<n;i++){const h1=hash(X*13.1+i*7.7+sl*.37,Z*9.3+i*3.1+sl*.011),h2=hash(X*5.5+i*1.9+sl*.07,Z*17.7+i*4.3+sl*.19),x=X*20+h1*20,z=Z*20+h2*20,id=sl+':'+X+','+Z+':'+i;if(col.has(id)||!wkOK(x,z))continue;addC(id,x,z,hash(h1*99,h2*77)<.1*e.gd?1:0)}
 if(0&&e.tr&&hash(X*3.3+sl,Z*2.2)<.4){const x=X*20+hash(X,sl)*20,z=Z*20+hash(Z,sl)*20,id=sl+':T'+X+','+Z;if(!col.has(id)&&wkOK(x,z))addC(id,x,z,2)}}}
 function collect(c){if(!me){needReg();return}G.remove(c.m);cs=cs.filter(q=>q!==c);st.col.ids.push(c.id);const e=cur(),v=Math.round([1,5,50][c.t]*e.m*(mnt()<10?2:1));add(v);prog('coin',1);toast((c.t==2?'🏴‍☠️ Peti harta! +':'🪙 +')+v)}
-window.needReg=()=>{toast('Daftar jadi warga dulu supaya bisa kumpulin koin 🪙')};
+window.needReg=()=>{
+  let b=document.getElementById('pkNeed');
+  if(!b){
+    const st=document.createElement('style');
+    st.textContent='@keyframes pkNeedIn{0%{transform:translate(-50%,-50%) scale(.85);opacity:0}15%{transform:translate(-50%,-50%) scale(1.04);opacity:1}25%{transform:translate(-50%,-50%) translateX(-6px)}35%{transform:translate(-50%,-50%) translateX(6px)}45%{transform:translate(-50%,-50%) translateX(-4px)}55%{transform:translate(-50%,-50%) translateX(4px)}65%,100%{transform:translate(-50%,-50%) scale(1);opacity:1}}';
+    document.head.appendChild(st);
+    b=document.createElement('div');b.id='pkNeed';
+    b.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:99999;width:min(86vw,340px);box-sizing:border-box;text-align:center;padding:18px 20px;border-radius:20px;background:var(--pn,#16213a);color:inherit;border:2px solid var(--ac,#e8553d);box-shadow:0 12px 40px rgba(0,0,0,.55);font-weight:700;font-size:16px;line-height:1.45;pointer-events:none;display:none';
+    b.innerHTML='<div style="font-size:34px;margin-bottom:6px">🔒</div><div>Kamu belum daftar</div><div style="font-weight:500;font-size:14px;opacity:.9;margin-top:4px">Daftar jadi warga dulu (tombol 📸 di kanan atas) supaya bisa klaim koin</div>';
+    document.body.appendChild(b);
+  }
+  b.style.display='block';b.style.animation='none';void b.offsetWidth;b.style.animation='pkNeedIn .55s ease-out';
+  clearTimeout(needReg.t);needReg.t=setTimeout(()=>{b.style.display='none'},3200);
+  try{note(330,.16,'square',.12,200);setTimeout(()=>note(220,.28,'square',.12,110),170)}catch(e){}
+  try{navigator.vibrate&&navigator.vibrate([80,40,80])}catch(e){}
+};
 function add(n){if(!me){needReg();return}st.c+=n;st.tot+=n;sv();chip();badge()}
 /* --- peliharaan, aura, kembang api --- */
 function emo(ch){const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.font='48px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(ch,32,34);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true}));s.scale.set(.9,.9,1);return s}
