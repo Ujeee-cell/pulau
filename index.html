@@ -482,12 +482,7 @@ if(ws.length<=36)for(const o of ws){const sx=o.scale.x,sy=o.scale.y,x=o.position
 bx(g,sx+.12,.05,.09,tr,x,y+sy/2+.01,z+sg*.02);bx(g,sx+.12,.05,.09,tr,x,y-sy/2-.04,z+sg*.02);bx(g,.05,sy,.09,tr,x-sx/2-.02,y-sy/2,z+sg*.02);bx(g,.05,sy,.09,tr,x+sx/2-.02,y-sy/2,z+sg*.02);bx(g,.03,sy,.06,tr,x,y-sy/2,z+sg*.03);
 bx(g,sx+.16,.04,.14,0xcfc8b8,x,y-sy/2-.09,z+sg*.07);
 if(H>.35&&sx>.2){for(const q of[-1,1])bx(g,.09,sy+.04,.04,fc,x+q*(sx/2+.1),y-sy/2-.02,z+sg*.03)}
-if(sg>0&&H2>.4&&sx>.2){bx(g,sx,.07,.1,0x6a4526,x,y-sy/2-.17,z+.1);for(let i=0;i<3;i++){const m=new THREE.Mesh(new THREE.IcosahedronGeometry(.06,0),M(i%2?fc:0x3a8a3a));m.position.set(x-sx*.3+i*sx*.3,y-sy/2-.09,z+.1);g.add(m)}}}
-if(H2<.7){for(const q of[-1,1])bx(g,.07,.95,.07,tr,cx+q*.58,.04,zf+.58);bx(g,1.4,.07,.9,fc,cx,.98,zf+.4);bx(g,1.2,.04,.04,0xffe9a8,cx,.93,zf+.84)}
-for(const q of[-1,1]){cy(g,.13,.1,.22,0xb5533c,cx+q*.95,0,zf+.4,8);const m=new THREE.Mesh(new THREE.IcosahedronGeometry(.17,1),M(q>0?0x2f7a3a:0x3f8f4a));m.position.set(cx+q*.95,.36,zf+.4);g.add(m)}
-if(H3>.45){bx(g,.05,.5,.05,0x5a3a22,xr+.3,0,zf+.55);bx(g,.22,.16,.3,0xd83030,xr+.3,.5,zf+.55)}
-if(H>.5)bx(g,.2,.25,.4,0xd8dce0,xr+.08,.5,cz);
-if(H2>.5)cy(g,.26,.26,.7,0x3b6fa0,xl-.3,0,cz-d*.2,10);
+}
 }
 function detail3(g,b){const H=hash((b?b.x:3)*.77+5,(b?b.z:4)*1.21+9);g.updateMatrixWorld(true);const kids=[...g.children];let nw=0,ch=0;
 for(const o of kids){
@@ -500,10 +495,10 @@ else if(o.isGroup||o.isMesh){const m=o.isGroup?o.children[0]:o,gm=m&&m.geometry;
 if(sz.x>.5&&sz.y>.2&&sz.x<12){const c=m.material.color,dk=c.clone().offsetHSL(0,0,-.08).getHex();bx(g,sz.x+.05,.06,sz.z+.05,0x4a3020,cx,bb.min.y-.04,cz);for(let i=1;i<=3;i++){const f=i/4;bx(g,sz.x*(1-f)+.06,.03,sz.z*(1-f)+.06,dk,cx,bb.min.y+f*sz.y-.02,cz)}cy(g,.045,.02,.2,0x5a3a22,cx,bb.max.y-.02,cz,5);if(!ch&&H>.45&&sz.x>1.6&&sz.y>.4){ch=1;const y1=bb.min.y+sz.y*.3;bx(g,.24,sz.y*.3+.4,.24,0x9a4a3a,cx+sz.x*.2,y1,cz-sz.z*.15);bx(g,.32,.06,.32,0x444444,cx+sz.x*.2,y1+sz.y*.3+.4,cz-sz.z*.15)}}}}}}
 function detailB(g,b){const bb=tbb(g),w=bb.max.x-bb.min.x,d=bb.max.z-bb.min.z,cx=(bb.max.x+bb.min.x)/2,cz=(bb.max.z+bb.min.z)/2;if(w<.8||d<.8||w>14||d>14||bb.max.y<.9)return;
 bx(g,w+.14,.1,d+.14,0x8f8b82,cx,0,cz);
-for(const sx of[-1,1]){const m=new THREE.Mesh(new THREE.IcosahedronGeometry(.2,0),M(0x2f7a3a));m.scale.set(1,.8,1);m.position.set(cx+sx*(w/2+.12),.18,bb.max.z+.05);m.castShadow=true;g.add(m)}detail2(g,b,bb,w,d,cx,cz);detail3(g,b)}
+detail2(g,b,bb,w,d,cx,cz);detail3(g,b)}
 function bigDet(g){const bb=tbb(g),w=bb.max.x-bb.min.x,d=bb.max.z-bb.min.z;if(w<1||d<1||w>14||bb.max.y<.9)return;const cx=(bb.max.x+bb.min.x)/2,zf=bb.max.z;
-for(const q of[-1,1]){bx(g,.05,.9,.05,0xcfc8b8,cx+q*.3,.04,zf+.05)}bx(g,.7,.06,.06,0xcfc8b8,cx,.93,zf+.05);bx(g,w*1.02,.05,.07,0xb8b2a4,0,Math.min(bb.max.y*.5,1.1),bb.max.z+.01);
-const l=new THREE.Mesh(new THREE.SphereGeometry(.07,6,5),new THREE.MeshBasicMaterial({color:0xffe9a8}));l.position.set(cx+.5,1,zf+.12);g.add(l)}
+bx(g,w*1.02,.05,.07,0xb8b2a4,0,Math.min(bb.max.y*.5,1.1),bb.max.z+.01);
+}
 function addB(b){const c=CAT[b.i],g=new THREE.Group(),ig=new THREE.Group();g.add(ig);(U[c[0]]||B[c[1]])(ig,c[2]);if(isBig(c))try{detailB(ig,b);bigDet(ig)}catch(e){dbg(e)}try{PKH.pre&&PKH.pre(ig,b)}catch(e){dbg(e)}try{mergeGroup(ig)}catch(e){dbg(e)}if(isBig(c))ig.scale.setScalar(BS);g.position.set(b.x,.3,b.z);g.rotation.y=(b.r||0)*Math.PI/4;b.h=new THREE.Box3().setFromObject(g).max.y-.3;b.g=g;
  b.lit=!!c[2].lamp;if(b.lit){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,opacity:.5})),z=c[2].lamp?3.2:c[3]*2.6+1.5;s.scale.set(z,z,1);s.position.y=c[2].lamp?b.h-.2:Math.min(b.h*.5,1.4);s.visible=false;g.add(s);b.gl=s}
  relabel(b);bg.add(g);lightB(b);markDirty(Math.floor(b.x),Math.floor(b.z),Math.ceil(c[3])+1)}
