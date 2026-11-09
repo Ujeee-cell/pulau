@@ -1671,14 +1671,14 @@ function openP(keep){const c=X.cnt(),sc=pnl.querySelector('.cd')?pnl.querySelect
     +'<div class="fr"><button class="btn pri" data-a="sv">💾 Simpan</button><button class="btn" data-a="rs">🔄 Mulai dari 0</button><button class="btn" data-a="tg">'+(m.aktif?'⏸️ Jeda':'▶️ Aktifkan')+'</button><button class="btn red" data-a="dl">🗑️</button></div>'}
    else h+='<div class="fr"><button class="btn red" data-a="dl">🗑️ Hapus</button></div>';
    h+='</div>'});
-  h+='<div class="mi" id="pkn"><b>➕ Misi baru</b><div class="fr"><select id="nb">'+bOpt().map(n=>'<option'+(n==='Sekolah'?' selected':'')+'>'+esc(n)+'</option>').join('')+'</select><span>target</span><input class="n" id="nt" type="number" min="1" value="100"></div><div class="fr"><input id="nj" type="text" placeholder="Judul misi (opsional)" style="flex:1"></div><div class="fr"><button class="btn pri" data-a="nw">Buat misi (hitung dari sekarang)</button></div></div>'}
+  h+='<div class="mi" id="pkn"><b>➕ Misi baru</b><div class="fr"><select id="pkb">'+bOpt().map(n=>'<option'+(n==='Sekolah'?' selected':'')+'>'+esc(n)+'</option>').join('')+'</select><span>target</span><input class="n" id="pkt" type="number" min="1" value="100"></div><div class="fr"><input id="pkj" type="text" placeholder="Judul misi (opsional)" style="flex:1"></div><div class="fr"><button class="btn pri" data-a="nw">Buat misi (hitung dari sekarang)</button></div></div>'}
  h+='<div class="fr" style="justify-content:flex-end"><button class="btn" data-a="x">Tutup</button></div>';
  pnl.innerHTML='<div class="cd">'+h+'</div>';pnl.style.display='flex';if(keep)pnl.querySelector('.cd').scrollTop=sc}
 let lastErr='';const call=async(n,b)=>{const r=await fetch(RPC+n,{method:'POST',headers:H,body:JSON.stringify(b)});if(!r.ok){let t='';try{const j=await r.json();t=j.message||j.hint||JSON.stringify(j)}catch(e){}throw new Error(n+' → '+r.status+(t?': '+t:''))}return r};
 pnl.onclick=async e=>{if(e.target===pnl){pnl.style.display='none';return}const bt=e.target.closest('[data-a]');if(!bt)return;const a=bt.dataset.a;if(a==='x'){pnl.style.display='none';return}
  const mi=bt.closest('.mi'),id=mi&&mi.dataset.id?+mi.dataset.id:0,c=X.cnt();pnl.dataset.busy=1;
  try{
-  if(a==='nw'){const t=Math.max(1,Math.round(+$('nt').value)||0);await call('buat_misi',{p_pin:adminPin,p_bangunan:$('nb').value,p_target:t,p_judul:$('nj').value||null});toast('Misi dibuat ✅')}
+  if(a==='nw'){const t=Math.max(1,Math.round(+$('pkt').value)||0);await call('buat_misi',{p_pin:adminPin,p_bangunan:$('pkb').value,p_target:t,p_judul:$('pkj').value||null});toast('Misi dibuat ✅')}
   else if(a==='sv'){const o={};mi.querySelectorAll('.fp').forEach(i=>{const k=i.dataset.k,v=Math.min(c[k],Math.max(0,Math.round(+i.value)||0));o[k]=c[k]-v});await call('atur_misi',{p_pin:adminPin,p_id:id,p_bangunan:mi.querySelector('.fb').value,p_target:Math.max(1,Math.round(+mi.querySelector('.ft').value)||1),p_judul:mi.querySelector('.fj').value,p_mulai:o});toast('Misi disimpan ✅')}
   else if(a==='rs'){await call('mulai_ulang_misi',{p_pin:adminPin,p_id:id});toast('Hitungan warga baru dimulai dari 0 ✅')}
   else if(a==='tg'){const m=X.MS.find(z=>z._id===id);await call('atur_misi',{p_pin:adminPin,p_id:id,p_aktif:!m.aktif});toast(m.aktif?'Misi dijeda':'Misi aktif')}
@@ -1688,6 +1688,11 @@ pnl.onclick=async e=>{if(e.target===pnl){pnl.style.display='none';return}const b
 el.onclick=()=>openP();
 X.render=render;window.PKR={render};
 setInterval(()=>{try{render()}catch(e){}},2000);addEventListener('resize',()=>{try{place()}catch(e){}});
+
+/* ---------- TOMBOL 👁 SEMBUNYIKAN / MUNCULKAN SEMUA TOMBOL ---------- */
+const ec=document.createElement('style');ec.textContent='#pkeye{position:fixed;z-index:19;right:8px;top:calc(150px + env(safe-area-inset-top,0px));width:40px;height:40px;border-radius:12px;border:1px solid var(--bd);background:var(--pn);color:var(--tx);font-size:18px;cursor:pointer;padding:0;opacity:.9}body.hideui #pkeye{opacity:.3}body.hideui>*:not(canvas):not(script):not(style):not(#pkeye):not(#toast):not(#modal):not([style*="pointer-events:none"]){display:none!important}';document.head.appendChild(ec);
+const ey=document.createElement('button');ey.id='pkeye';ey.textContent='👁';document.body.appendChild(ey);
+ey.onclick=()=>{const h=document.body.classList.toggle('hideui');ey.textContent=h?'🙈':'👁';pnl.style.display='none'};
 render();
 })();
 </script>
