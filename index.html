@@ -1535,4 +1535,45 @@ window.xUpd=(dt,t,cx,cz)=>{if(o4)o4(dt,t,cx,cz);try{
  trainUI(dt);vehUpd(dt);vehOthers(dt,cx,cz)}catch(e){dbg(e)}};
 })();
 </script>
+<script>
+/* ===== Multi-pulau: IG / TikTok / YouTube, rumah otomatis @username, peta, rebutan bangunan ===== */
+(()=>{
+const PF={ig:{n:'Pulau IG',e:'📸',c:[0,0],r:15,col:'#e1306c'},tt:{n:'Pulau TikTok',e:'🎵',c:[260,-30],r:20,col:'#25b8c4'},yt:{n:'Pulau YouTube',e:'▶️',c:[-260,40],r:20,col:'#e53935'}};
+const X=window.PKX={W:[],M:[]},hs=new Map(),seen=new Set();let first=true;
+const HI=()=>CAT.findIndex(c=>c[0]==='Rumah (bebas)');
+let gr={},fx=[];
+function grow(k,n){const t=Math.sqrt(Math.max(n,1)*10.4/3.1416)+10,r=k==='ig'?(t>15?t*1.2:0):Math.max(PF[k].r,t*1.2);if(!r||r<=(gr[k]||0))return 0;gr[k]=r;const[p,q]=PF[k].c;for(let gj=Math.floor(q-r*1.5);gj<q+r*1.5;gj++)for(let gi=Math.floor(p-r*1.5);gi<p+r*1.5;gi++){const x=gi+.5,z=gj+.5,d=Math.hypot(x-p,(z-q)*1.1),a=Math.atan2(z-q,x-p);if(d<r*(1+.18*Math.sin(a*3+p)+.1*Math.sin(a*5)))setLandRaw(gi,gj,1)}return 1}
+const okp=(x,z)=>isL(x,z)&&isL(x+1,z)&&isL(x-1,z)&&isL(x,z+1)&&isL(x,z-1)&&!fx.some(b=>Math.hypot(b.x-x,b.z-z)<2.6);
+function slots(k,n){const[p,q]=PF[k].c,o=[];for(let g=0;g<150&&o.length<n;g++){const R=6.5+g*2.4,m=Math.floor(6.283*R/2.4);for(let a=0;a<m;a++){const t=a/m*6.283+g*.5,x=p+Math.cos(t)*R,z=q+Math.sin(t)*R;if(okp(x,z))o.push([x,z])}}return o}
+const cnt=()=>{const c={ig:0,tt:0,yt:0};X.W.forEach(w=>c[w.platform||'ig']++);return c};
+function draw(){if(typeof CAT==='undefined'||!blds)return;const cn=cnt();let gw=0;for(const k in PF)gw|=grow(k,cn[k]);if(gw){markAll();rebuild()}fx=blds.filter(b=>!b.auto);const hi=HI();if(hi<0)return;let ch=0;
+for(const[id,b]of hs)if(!blds.includes(b))hs.delete(id);
+const sl={},ix={ig:0,tt:0,yt:0};for(const k in PF)sl[k]=slots(k,cn[k]);
+X.W.forEach(w=>{const k=w.platform||'ig',s=sl[k][ix[k]++],nm='@'+(w.handle||String(w.nama||'').replace(/^@/,'')),o=hs.get('w'+w.id);if(o){if(o.name!==nm){o.name=nm;relabel(o)}return}if(!s)return;const b={i:hi,x:s[0],z:s[1],name:nm,r:ix[k]%8,auto:1};blds.push(b);addB(b);hs.set('w'+w.id,b);ch=1});
+X.M.forEach((m,n)=>{if(!m.pemenang||!PF[m.pemenang])return;const i=CAT.findIndex(c=>c[0]===m.bangunan);if(i<0||hs.has('m'+m.id))return;const[p,q]=PF[m.pemenang].c,t=n*2.1;let x=p+Math.cos(t)*3.4,z=q+Math.sin(t)*3.4;if(!isL(x,z)){x=p;z=q}const b={i,x,z,name:m.bangunan+' 🏆 '+PF[m.pemenang].n,r:0,auto:1};blds.push(b);addB(b);hs.set('m'+m.id,b);ch=1;if(!first&&!seen.has(m.id))toast('🏆 '+PF[m.pemenang].n+' menang rebutan '+m.bangunan+'!');seen.add(m.id)});
+if(ch)rebuild()}
+async function refresh(){try{let a=[],o=0;for(;;){const r=await fetch(SB+'?select=id,nama,handle,platform,dibuat&order=dibuat.asc,id.asc&limit=1000&offset='+o,{headers:H});if(!r.ok){a=null;break}const j=await r.json();a=a.concat(j);if(j.length<1000)break;o+=1000}if(a)X.W=a}catch(e){}
+const gm=async()=>{try{const r=await fetch(API+'milestone_pulau?select=*&order=id',{headers:H});if(r.ok)X.M=await r.json()}catch(e){}};await gm();
+const c=cnt();if(X.M.some(m=>!m.pemenang&&Object.values(c).some(v=>v>=m.target))){try{await fetch(RPC+'klaim_milestone',{method:'POST',headers:H,body:'{}'});await gm()}catch(e){}}
+draw();X.M.forEach(m=>{if(m.pemenang)seen.add(m.id)});first=false}
+X.refresh=refresh;
+const _a=applyIsland;applyIsland=function(d){_a(d);hs.clear();gr={};draw()};
+const _d=defIsland;defIsland=function(){_d();hs.clear();gr={};draw()};
+const _s=snap;snap=function(){const k=blds;blds=blds.filter(b=>!b.auto);try{return _s()}finally{blds=k}};
+/* daftar: pilih pulau + username */
+$('bR').onclick=()=>{if(me)return profil(me);
+modal({t:'Daftar jadi warga',txt:'Pilih pulau & isi username sosmed kamu (tanpa @). Rumahmu otomatis dibangun dengan nama @username.<select id="pfS" style="width:100%;margin:8px 0;padding:8px;border-radius:10px;background:transparent;color:inherit;border:1px solid var(--bd)">'+Object.keys(PF).map(k=>`<option value="${k}">${PF[k].e} ${PF[k].n}</option>`).join('')+'</select>',inp:1,ph:'username (contoh: budi)',max:30,file:1,ok:'Daftar',cb:(n,f)=>{
+const h=(n||'').replace(/^@/,'');if(!/^[A-Za-z0-9._]{2,30}$/.test(h)){toast('Username 2-30 karakter: huruf, angka, titik, _');return false}const pf=$('pfS').value;
+const go=async p=>{try{const r=await fetch(SB,{method:'POST',headers:{...H,Prefer:'return=representation'},body:JSON.stringify({nama:('@'+h).slice(0,20),handle:h,platform:pf,foto:p})});if(r.status===409){toast('Username itu sudah dipakai di '+PF[pf].n);return}if(!r.ok)throw 0;const[w]=await r.json();known.add(w.id);const q={id:w.id,n:w.nama,p:w.foto,d:w.dibuat,bio:w.bio};addRes(q);me=q;myId=q.id;ui();save();ping();closeM();await refresh();toast('Rumahmu sudah jadi, @'+h+'! Selamat datang 🏝️')}catch(e){toast('Gagal mendaftar, coba lagi')}};
+f?proc(f,go):go(null);return false}})};
+/* peta */
+const bt=document.createElement('button');bt.className='btn';bt.id='bM';bt.textContent='🗺️ Peta';$('bar').insertBefore(bt,$('bD'));
+bt.onclick=()=>{const c=cnt(),nx=X.M.find(m=>!m.pemenang),ks=Object.keys(PF);
+const sv=`<svg viewBox="0 0 300 120" style="width:100%;display:block;background:#79b8e8;border-radius:12px">${[['yt',55],['ig',150],['tt',245]].map(([k,x])=>`<circle cx="${x}" cy="52" r="${PF[k].r*1.5}" fill="${PF[k].col}" opacity=".85"/><text x="${x}" y="57" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">${c[k]}</text><text x="${x}" y="108" text-anchor="middle" font-size="10" fill="#12263a">${PF[k].e} ${PF[k].n}</text>`).join('')}</svg>`;
+const rows=nx?ks.map(k=>`<div>${PF[k].e} ${PF[k].n}: ${c[k]}/${nx.target}</div>`).join(''):'';
+const hd=X.M.length?(nx?`<p>🏆 Rebutan: pulau pertama dengan <b>${nx.target} warga</b> otomatis dibangunkan <b>${esc(nx.bangunan)}</b>!</p>${rows}`:'<p>Semua rebutan sudah ada pemenangnya.</p>')+X.M.filter(m=>m.pemenang).map(m=>`<div>✅ ${esc(m.bangunan)} → ${PF[m.pemenang].n}</div>`).join(''):'';
+modal({t:'🗺️ Peta Pulau',txt:sv+'<div style="margin-top:8px">'+hd+'</div>',nocl:1,ok:'Tutup',x:ks.map(k=>({l:PF[k].e,cb:()=>fly(PF[k].c[0],PF[k].c[1])})),cb:()=>true})};
+setTimeout(refresh,1500);setInterval(refresh,15000);
+})();
+</script>
 </body></html>
