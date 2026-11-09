@@ -1542,6 +1542,7 @@ const PF={ig:{n:'Pulau IG',e:'📸',c:[0,0],r:15,col:'#e1306c'},tt:{n:'Pulau Tik
 const X=window.PKX={W:[],M:[]},hs=new Map(),seen=new Set();let first=true;
 const HI=()=>CAT.findIndex(c=>c[0]==='Rumah (bebas)');
 const P=6,D=170;let gr={},fx=[];
+const cnt=()=>{const c={ig:0,tt:0,yt:0};X.W.forEach(w=>c[w.platform||'ig']++);return c};
 /* pulau melebar otomatis sesuai jumlah warga (1 blok kota = 6x6 petak) */
 function grow(k,n){const t=Math.sqrt((n+9)*P*P*1.35/3.1416)+10,r=k==='ig'?(t>16?t:0):Math.max(PF[k].r,t);if(!r||r<=(gr[k]||0))return 0;gr[k]=r;const[p,q]=PF[k].c;for(let gj=Math.floor(q-r*1.5);gj<q+r*1.5;gj++)for(let gi=Math.floor(p-r*1.5);gi<p+r*1.5;gi++){const x=gi+.5,z=gj+.5,d=Math.hypot(x-p,(z-q)*1.1),a=Math.atan2(z-q,x-p);if(d<r*(1+.14*Math.sin(a*3+p)+.08*Math.sin(a*5)))setLandRaw(gi,gj,1)}return 1}
 const okc=(x,z)=>isL(x,z)&&isL(x+2.2,z+2.2)&&isL(x-2.2,z+2.2)&&isL(x+2.2,z-2.2)&&isL(x-2.2,z-2.2)&&!fx.some(b=>Math.hypot(b.x-x,b.z-z)<4.5);
