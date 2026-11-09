@@ -1657,7 +1657,7 @@ function render(){if(!X.cnt)return;const c=X.cnt(),a=act();let best=null;
  if(h!==osig&&pnl.style.display==='flex'&&!pnl.dataset.busy&&!isAd())openP(true);osig=h}
 const bOpt=()=>{const s=new Set();CAT.forEach(c=>{const k=c[c.length-1];if((k===0||k===1)&&c[0])s.add(c[0])});return[...s]};
 function openP(keep){const c=X.cnt(),sc=pnl.querySelector('.cd')?pnl.querySelector('.cd').scrollTop:0;
- let h='<h3>🏝️ Rebutan Bangunan</h3>'+listHTML();
+ let h='<h3>🏝️ Rebutan Bangunan</h3>'+(lastErr?'<div style="background:rgba(200,40,30,.15);border:1px solid #c0261a;border-radius:10px;padding:8px;margin:6px 0;font-size:13px;word-break:break-word">'+esc(lastErr)+'</div>':'')+listHTML();
  if(isAd()){
   h+='<hr style="border:0;border-top:1px solid var(--bd);margin:12px 0"><h3>⚙️ Atur Misi (admin)</h3>';
   if(X.ok===0)h+='<small style="color:#c0261a">Tabel misi belum ada di Supabase. Jalankan file misi-rebutan.sql dulu.</small>';
@@ -1674,7 +1674,7 @@ function openP(keep){const c=X.cnt(),sc=pnl.querySelector('.cd')?pnl.querySelect
   h+='<div class="mi" id="pkn"><b>➕ Misi baru</b><div class="fr"><select id="nb">'+bOpt().map(n=>'<option'+(n==='Sekolah'?' selected':'')+'>'+esc(n)+'</option>').join('')+'</select><span>target</span><input class="n" id="nt" type="number" min="1" value="100"></div><div class="fr"><input id="nj" type="text" placeholder="Judul misi (opsional)" style="flex:1"></div><div class="fr"><button class="btn pri" data-a="nw">Buat misi (hitung dari sekarang)</button></div></div>'}
  h+='<div class="fr" style="justify-content:flex-end"><button class="btn" data-a="x">Tutup</button></div>';
  pnl.innerHTML='<div class="cd">'+h+'</div>';pnl.style.display='flex';if(keep)pnl.querySelector('.cd').scrollTop=sc}
-const call=async(n,b)=>{const r=await fetch(RPC+n,{method:'POST',headers:H,body:JSON.stringify(b)});if(!r.ok)throw new Error(n+' '+r.status);return r};
+let lastErr='';const call=async(n,b)=>{const r=await fetch(RPC+n,{method:'POST',headers:H,body:JSON.stringify(b)});if(!r.ok){let t='';try{const j=await r.json();t=j.message||j.hint||JSON.stringify(j)}catch(e){}throw new Error(n+' → '+r.status+(t?': '+t:''))}return r};
 pnl.onclick=async e=>{if(e.target===pnl){pnl.style.display='none';return}const bt=e.target.closest('[data-a]');if(!bt)return;const a=bt.dataset.a;if(a==='x'){pnl.style.display='none';return}
  const mi=bt.closest('.mi'),id=mi&&mi.dataset.id?+mi.dataset.id:0,c=X.cnt();pnl.dataset.busy=1;
  try{
@@ -1683,7 +1683,7 @@ pnl.onclick=async e=>{if(e.target===pnl){pnl.style.display='none';return}const b
   else if(a==='rs'){await call('mulai_ulang_misi',{p_pin:adminPin,p_id:id});toast('Hitungan warga baru dimulai dari 0 ✅')}
   else if(a==='tg'){const m=X.MS.find(z=>z._id===id);await call('atur_misi',{p_pin:adminPin,p_id:id,p_aktif:!m.aktif});toast(m.aktif?'Misi dijeda':'Misi aktif')}
   else if(a==='dl'){if(!confirm('Hapus misi ini?'))throw 0;await call('hapus_misi',{p_pin:adminPin,p_id:id});toast('Misi dihapus')}
- }catch(err){if(err)toast('Gagal — cek PIN / jalankan misi-rebutan.sql di Supabase')}
+ lastErr=''}catch(err){if(err)lastErr='❌ Gagal: '+(err.message||err)+(/404|PGRST20|does not exist|schema cache/i.test(err.message||'')?' — kemungkinan misi-rebutan.sql belum dijalankan di Supabase.':/PIN/i.test(err.message||'')?' — PIN ditolak server.':'')}
  delete pnl.dataset.busy;await X.refresh();openP(true)};
 el.onclick=()=>openP();
 X.render=render;window.PKR={render};
