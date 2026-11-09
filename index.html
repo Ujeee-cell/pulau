@@ -1538,32 +1538,40 @@ window.xUpd=(dt,t,cx,cz)=>{if(o4)o4(dt,t,cx,cz);try{
 <script>
 /* ===== Multi-pulau: IG / TikTok / YouTube, rumah otomatis @username, peta, rebutan bangunan ===== */
 (()=>{
-const PF={ig:{n:'Pulau IG',e:'📸',c:[0,0],r:15,col:'#e1306c'},tt:{n:'Pulau TikTok',e:'🎵',c:[170,0],r:20,col:'#25b8c4'},yt:{n:'Pulau YouTube',e:'▶️',c:[-170,0],r:20,col:'#e53935'}};
+const PF={ig:{n:'Pulau IG',e:'📸',c:[0,0],col:'#e1306c'},tt:{n:'Pulau TikTok',e:'🎵',c:[0,0],col:'#25b8c4'},yt:{n:'Pulau YouTube',e:'▶️',c:[0,0],col:'#e53935'}};
 const X=window.PKX={W:[],M:[]},hs=new Map(),seen=new Set();let first=true;
 const HI=()=>CAT.findIndex(c=>c[0]==='Rumah (bebas)');
-const P=6,D=170;let gr={},fx=[];
+const P=9,G=50;let gr={},fx=[],rq={ig:45,tt:24,yt:24};
 const cnt=()=>{const c={ig:0,tt:0,yt:0};X.W.forEach(w=>c[w.platform||'ig']++);return c};
-/* pulau melebar otomatis sesuai jumlah warga (1 blok kota = 6x6 petak) */
-function grow(k,n){const t=Math.sqrt((n+9)*P*P*1.35/3.1416)+10,r=k==='ig'?(t>16?t:0):Math.max(PF[k].r,t);if(!r||r<=(gr[k]||0))return 0;gr[k]=r;const[p,q]=PF[k].c;for(let gj=Math.floor(q-r*1.5);gj<q+r*1.5;gj++)for(let gi=Math.floor(p-r*1.5);gi<p+r*1.5;gi++){const x=gi+.5,z=gj+.5,d=Math.hypot(x-p,(z-q)*1.1),a=Math.atan2(z-q,x-p);if(d<r*(1+.14*Math.sin(a*3+p)+.08*Math.sin(a*5)))setLandRaw(gi,gj,1)}return 1}
-const okc=(x,z)=>isL(x,z)&&isL(x+2.2,z+2.2)&&isL(x-2.2,z+2.2)&&isL(x+2.2,z-2.2)&&isL(x-2.2,z-2.2)&&!fx.some(b=>Math.hypot(b.x-x,b.z-z)<4.5);
-function cells(k){const[p,q]=PF[k].c,N=Math.ceil(((gr[k]||PF[k].r)+6)/P),a=[];for(let i=-N;i<=N;i++)for(let j=-N;j<=N;j++){if(i*i+j*j<=2)continue;const x=p+i*P,z=q+j*P;if(okc(x,z))a.push([i*i+j*j,Math.atan2(j,i),x,z,i,j])}return a.sort((u,v)=>u[0]-v[0]||u[1]-v[1])}
-function rt(x,z,v){const i=Math.floor(x),j=Math.floor(z),c=gch(Math.floor(i/C),Math.floor(j/C),false);if(!c)return;const k=(j-c.cz*C)*C+(i-c.cx*C);if(c.l[k]&&!c.rd[k]&&!fx.some(b=>Math.hypot(b.x-i-.5,b.z-j-.5)<3)){c.rd[k]=v||1;c.dirty=true}}
+/* tata letak: pulau melebar sesuai warga; pulau tetangga ikut menjauh (radius dibulatkan per 12 petak biar nggak geser terus) */
+function lay(cn){for(const k in PF)rq[k]=Math.max(k==='ig'?45:24,Math.ceil((Math.sqrt((cn[k]+9)*P*P*1.5/3.1416)+12)/12)*12);const d=a=>1.25*(rq.ig+rq[a])+G;PF.ig.c=[0,0];PF.tt.c=[d('tt'),0];PF.yt.c=[-d('yt'),0]}
+function blob(p,q,r,v){const e=r*1.3+2;for(let gj=Math.floor(q-e);gj<q+e;gj++)for(let gi=Math.floor(p-e);gi<p+e;gi++){const x=gi+.5,z=gj+.5,d=Math.hypot(x-p,(z-q)*1.1),a=Math.atan2(z-q,x-p);if(v?d<r*(1+.14*Math.sin(a*3+p)+.08*Math.sin(a*5)):d<r*1.25+2)setLandRaw(gi,gj,v)}}
+function erase(k){const g=gr[k];blob(g.c[0],g.c[1],g.r,0);for(const[id,b]of[...hs])if(b.pf===k||b.mk===k){try{bg.remove(b.g)}catch(e){}const i=blds.indexOf(b);if(i>=0)blds.splice(i,1);hs.delete(id)}}
+function layout(cn){lay(cn);let ch=0;for(const k in PF){const g=gr[k],c=PF[k].c,r=rq[k];
+ if(k==='ig'){if(r>45&&(!g||g.r<r)){blob(0,0,r,1);gr.ig={c:[0,0],r};ch=1}else if(!g)gr.ig={c:[0,0],r:45};continue}
+ if(g&&g.c[0]===c[0]&&g.r===r)continue;if(g)erase(k);blob(c[0],c[1],r,1);gr[k]={c:[c[0],c[1]],r};ch=1}return ch}
+function wipeFar(){lay(cnt());const R=rq.ig*1.25+12;for(const c of chunks.values()){for(let j=0;j<C;j++)for(let i=0;i<C;i++){if(!c.l[j*C+i])continue;if(Math.hypot(c.cx*C+i+.5,(c.cz*C+j+.5)*1.1)>R){c.l[j*C+i]=0;c.rd[j*C+i]=0}}c.dirty=true}}
+const okc=(x,z)=>isL(x,z)&&isL(x+3,z+3)&&isL(x-3,z+3)&&isL(x+3,z-3)&&isL(x-3,z-3)&&!fx.some(b=>Math.hypot(b.x-x,b.z-z)<5);
+/* tiap blok 9x9; 1 dari 9 blok sengaja dikosongkan (kavling) buat bangunan hadiah rebutan */
+function cells(k){const[p,q]=PF[k].c,N=Math.ceil((rq[k]*1.25+6)/P),a=[];for(let i=-N;i<=N;i++)for(let j=-N;j<=N;j++){if(!i&&!j)continue;const x=p+i*P,z=q+j*P;if(okc(x,z))a.push([i*i+j*j,Math.atan2(j,i),x,z,i,j,((i%3+3)%3===2&&(j%3+3)%3===2)])}return a.sort((u,v)=>u[0]-v[0]||u[1]-v[1])}
+function rt(x,z){const i=Math.floor(x),j=Math.floor(z),c=gch(Math.floor(i/C),Math.floor(j/C),false);if(!c)return;const k=(j-c.cz*C)*C+(i-c.cx*C);if(c.l[k]&&!c.rd[k]&&!fx.some(b=>Math.hypot(b.x-i-.5,b.z-j-.5)<3)){c.rd[k]=1;c.dirty=true}}
 function roads(k,m){const[p,q]=PF[k].c,e=(m+2)*P;for(let u=-m-1;u<=m;u++){const L=(u+.5)*P;for(let t=-e;t<=e;t++){rt(p+L,q+t);rt(p+t,q+L)}}}
-function draw(){if(typeof CAT==='undefined'||!blds)return;const cn=cnt();let gw=0;for(const k in PF)gw|=grow(k,cn[k]);if(gw)markAll();
-fx=blds.filter(b=>!b.auto);const hi=HI();if(hi<0)return;let ch=gw;
+function draw(){if(typeof CAT==='undefined'||!blds)return;const cn=cnt(),lc=layout(cn);if(lc)markAll();
+fx=blds.filter(b=>!b.auto);const hi=HI();if(hi<0)return;let ch=lc;
 for(const[id,b]of hs)if(!blds.includes(b))hs.delete(id);
-const used=new Set([...hs.values()].filter(b=>b.ck).map(b=>b.ck)),cs={},mx={};for(const k in PF)cs[k]=cells(k).filter(c=>!used.has(k+c[4]+','+c[5]));
+const used=new Set([...hs.values()].filter(b=>b.ck).map(b=>b.ck)),cs={},rs={},mx={};for(const k in PF){const a=cells(k);cs[k]=a.filter(c=>!c[6]&&!used.has(k+c[4]+','+c[5]));rs[k]=a.filter(c=>c[6])}
 X.W.forEach(w=>{const k=w.platform||'ig',nm='@'+(w.handle||String(w.nama||'').replace(/^@/,'')),o=hs.get('w'+w.id);if(o){if(o.name!==nm){o.name=nm;relabel(o)}return}const s=cs[k].shift();if(!s)return;mx[k]=Math.max(mx[k]||0,Math.abs(s[4]),Math.abs(s[5]));const b={i:hi,x:s[2],z:s[3],name:nm,r:s[5]>0?4:0,auto:1,pf:k,ck:k+s[4]+','+s[5]};blds.push(b);addB(b);hs.set('w'+w.id,b);ch=1});
-if(ch){for(const k in PF)roads(k,Math.max(mx[k]||0,[...hs.values()].reduce((m,b)=>b.pf===k?Math.max(m,Math.abs(Math.round((b.x-PF[k].c[0])/P)),Math.abs(Math.round((b.z-PF[k].c[1])/P))):m,0)))}
-X.M.forEach((m,n)=>{if(!m.pemenang||!PF[m.pemenang])return;const i=CAT.findIndex(c=>c[0]===m.bangunan);if(i<0||hs.has('m'+m.id))return;const[p,q]=PF[m.pemenang].c,t=n*2.1;let x=p+Math.cos(t)*4.5,z=q+Math.sin(t)*4.5;if(!isL(x,z)){x=p;z=q}const b={i,x,z,name:m.bangunan+' 🏆 '+PF[m.pemenang].n,r:0,auto:1};blds.push(b);addB(b);hs.set('m'+m.id,b);ch=1;if(!first&&!seen.has(m.id))toast('🏆 '+PF[m.pemenang].n+' menang rebutan '+m.bangunan+'!');seen.add(m.id)});
+if(ch)for(const k in PF)roads(k,Math.max(mx[k]||0,[...hs.values()].reduce((m,b)=>b.pf===k?Math.max(m,Math.abs(Math.round((b.x-PF[k].c[0])/P)),Math.abs(Math.round((b.z-PF[k].c[1])/P))):m,0)));
+const pi={ig:0,tt:0,yt:0};
+X.M.forEach(m=>{const k=m.pemenang;if(!k||!PF[k])return;const n=pi[k]++,i=CAT.findIndex(c=>c[0]===m.bangunan);if(i<0||hs.has('m'+m.id))return;const s=rs[k][n],x=s?s[2]:PF[k].c[0],z=s?s[3]:PF[k].c[1],b={i,x,z,name:m.bangunan+' 🏆 '+PF[k].n,r:0,auto:1,mk:k};blds.push(b);addB(b);hs.set('m'+m.id,b);ch=1;if(!first&&!seen.has(m.id))toast('🏆 '+PF[k].n+' menang rebutan '+m.bangunan+'!');seen.add(m.id)});
 if(ch)rebuild()}
 async function refresh(){try{let a=[],o=0;for(;;){const r=await fetch(SB+'?select=id,nama,handle,platform,dibuat&order=dibuat.asc,id.asc&limit=1000&offset='+o,{headers:H});if(!r.ok){a=null;break}const j=await r.json();a=a.concat(j);if(j.length<1000)break;o+=1000}if(a)X.W=a}catch(e){}
 const gm=async()=>{try{const r=await fetch(API+'milestone_pulau?select=*&order=id',{headers:H});if(r.ok)X.M=await r.json()}catch(e){}};await gm();
 const c=cnt();if(X.M.some(m=>!m.pemenang&&Object.values(c).some(v=>v>=m.target))){try{await fetch(RPC+'klaim_milestone',{method:'POST',headers:H,body:'{}'});await gm()}catch(e){}}
 draw();X.M.forEach(m=>{if(m.pemenang)seen.add(m.id)});first=false}
 X.refresh=refresh;
-const _a=applyIsland;applyIsland=function(d){_a(d);hs.clear();gr={};draw()};
-const _d=defIsland;defIsland=function(){_d();hs.clear();gr={};draw()};
+const _a=applyIsland;applyIsland=function(d){_a(d);hs.clear();gr={};wipeFar();draw()};
+const _d=defIsland;defIsland=function(){_d();hs.clear();gr={};wipeFar();draw()};
 const _s=snap;snap=function(){const k=blds;blds=blds.filter(b=>!b.auto);try{return _s()}finally{blds=k}};
 /* daftar: pilih pulau + username */
 $('bR').onclick=()=>{if(me)return profil(me);
@@ -1579,7 +1587,7 @@ function mm(){mq=0;const cv=$('pkm');if(!cv)return;const g=cv.getContext('2d'),W
 for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=2){const wx=MC[0]+(x-W/2)/MS,wz=MC[1]+(y-H/2)/MS;if(isL(wx,wz)){g.fillStyle=rdAt(Math.floor(wx),Math.floor(wz))?'#8a8d92':'#7bb067';g.fillRect(x,y,2,2)}}
 hs.forEach(b=>{if(!b.pf)return;g.fillStyle=PF[b.pf].col;g.fillRect((b.x-MC[0])*MS+W/2-1,(b.z-MC[1])*MS+H/2-1,2.5,2.5)});
 g.font='bold 11px system-ui';g.textAlign='center';for(const k in PF){g.fillStyle='#12263a';g.fillText(PF[k].e+' '+PF[k].n,(PF[k].c[0]-MC[0])*MS+W/2,(PF[k].c[1]-MC[1])*MS+H/2)}}
-bt.onclick=()=>{const c=cnt(),nx=X.M.find(m=>!m.pemenang),ks=Object.keys(PF);
+bt.onclick=()=>{MC=[(PF.tt.c[0]+PF.yt.c[0])/2,0];MS=300/(PF.tt.c[0]-PF.yt.c[0]+rq.tt*3);const c=cnt(),nx=X.M.find(m=>!m.pemenang),ks=Object.keys(PF);
 const hd=X.M.length?(nx?`<p>🏆 Rebutan: pulau pertama dengan <b>${nx.target} warga</b> dapat <b>${esc(nx.bangunan)}</b>!</p>`+ks.map(k=>`<div>${PF[k].e} ${PF[k].n}: ${c[k]}/${nx.target}</div>`).join(''):'<p>Semua rebutan sudah ada pemenangnya.</p>')+X.M.filter(m=>m.pemenang).map(m=>`<div>✅ ${esc(m.bangunan)} → ${PF[m.pemenang].n}</div>`).join(''):ks.map(k=>`<div>${PF[k].e} ${PF[k].n}: ${c[k]} warga</div>`).join('');
 modal({t:'🗺️ Peta Pulau',txt:'<canvas id="pkm" width="300" height="230" style="width:100%;border-radius:12px;touch-action:none;display:block"></canvas><div style="margin:6px 0"><button class="btn" id="mz1">＋</button> <button class="btn" id="mz2">－</button> <small>geser peta dengan jari</small></div>'+hd,nocl:1,ok:'Tutup',cb:()=>true});
 const cv=$('pkm');let dn=null;const up=()=>{if(!mq)mq=requestAnimationFrame(mm)};
