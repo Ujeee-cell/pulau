@@ -1282,6 +1282,10 @@ function dressTrain(T,L){const v=Math.abs(Math.round(((L.p[0]||[0,0])[0])*7+((L.
   for(const z of i===0?[1]:i===n-1?[-1]:[]){bx(q,.62,.16,.4,0x16222e,0,.34,1.95*z);for(const a of[-1,1])bx(q,.1,.08,.02,0xfff3b0,a*.2,.05,2.28*z);if(v!==0)bx(q,.64,.05,.5,V.s,0,.4,1.7*z)}
   q.traverse(o=>{if(o.isMesh)o.castShadow=true})});return T}
 function clearLine(L){if(L.grp){RG2.remove(L.grp);L.grp.traverse(o=>{if(o.geometry)o.geometry.dispose()});L.grp=null}if(L.train){RG2.remove(L.train.g);L.train=null}}
+function mkPil(L){if(L.pm){L.grp.remove(L.pm);L.pm.geometry.dispose();L.pm=null}const sp=L.sp,N=L.N;if(!sp||!L.grp)return;const fr=p=>rdAt(Math.floor(p.x),Math.floor(p.z))<1&&!blds.some(b=>!CAT[b.i][2].nb&&Math.hypot(b.x-p.x,b.z-p.z)<CAT[b.i][3]+.6),stp=Math.max(1,Math.round(16/(L.len/N))),parts=[];
+for(let i=0;i<=N;i+=stp){let j=-1;for(let d=0;d<=stp/2&&j<0;d++)for(const sg of[1,-1]){const k=i+sg*d;if(k>=0&&k<=N&&fr(sp[k])){j=k;break}}if(j<0)continue;const p=sp[j];parts.push([new THREE.CylinderGeometry(.26,.32,H0+.4,8),0xa9acb2,p.x,-.8+(H0+.4)/2,p.z])}
+if(!parts.length)return;const pm=new THREE.Mesh(mergeG(parts),VM);pm.castShadow=true;L.grp.add(pm);L.pm=pm}
+window.PKPIL=()=>{for(const L of rails)if(L.grp&&L.sp)mkPil(L)};
 function buildRail(L){clearLine(L);L.curve=null;L.len=0;L.sp=null;if(L.p.length<2)return;
  const pts=L.p.map(q=>new THREE.Vector3(q[0],H0,q[1])),cv2=new THREE.CatmullRomCurve3(pts,false,'centripetal');L.curve=cv2;L.len=cv2.getLength();
  const N=Math.max(2,Math.ceil(L.len/.6)),sp=cv2.getSpacedPoints(N),tn=sp.map((p,i)=>{const a=sp[Math.max(0,i-1)],b=sp[Math.min(N,i+1)];const dx=b.x-a.x,dz=b.z-a.z,l=Math.hypot(dx,dz)||1;return{x:dx/l,z:dz/l}});
@@ -1289,9 +1293,7 @@ function buildRail(L){clearLine(L);L.curve=null;L.len=0;L.sp=null;if(L.p.length<
  ribbon(sp,tn,-.95,.95,-.4,0,0xbfc2c8,o);ribbon(sp,tn,-.55,.55,0,.05,0x74777e,o);ribbon(sp,tn,-.42,-.34,.05,.14,0x2f3338,o);ribbon(sp,tn,.34,.42,.05,.14,0x2f3338,o);ribbon(sp,tn,-1,-.9,-.4,.18,0xdadde1,o);ribbon(sp,tn,.9,1,-.4,.18,0xdadde1,o);
  const G=new THREE.BufferGeometry();G.setAttribute('position',new THREE.Float32BufferAttribute(o.p,3));G.setAttribute('color',new THREE.Float32BufferAttribute(o.c,3));G.setIndex(o.i);G.computeVertexNormals();
  const m=new THREE.Mesh(G,RLM);m.castShadow=m.receiveShadow=true;L.grp.add(m);
- const parts=[];const stp=Math.max(1,Math.round(5/(L.len/N)));for(let i=0;i<=N;i+=stp){const p=sp[i];parts.push([new THREE.CylinderGeometry(.26,.32,H0+.4,8),0xa9acb2,p.x,(H0-.4-.8)/2+(-.8)+(H0+.4)/2-(H0-.4-.8)/2,p.z])}
- for(const q of parts){q[3]=-.8+(H0+.4)/2-.0}
- const pm=new THREE.Mesh(mergeG(parts),VM);pm.castShadow=true;L.grp.add(pm);RG2.add(L.grp);
+  mkPil(L);RG2.add(L.grp);
  const nc=Math.min(5,Math.floor(L.len/6));if(nc>=2){L.train=dressTrain(mkTrain(nc),L);RG2.add(L.train.g)}}
 function stPos(s){const L=rails[s.l];if(!L||!L.curve)return null;const u=clamp(s.u,0,1);return{p:L.curve.getPointAt(u),t:L.curve.getTangentAt(u)}}
 function buildStation(s){if(s.grp){RG2.remove(s.grp)}const P=stPos(s);if(!P)return;const g=new THREE.Group(),gy=-H0+.3,gm=new THREE.MeshBasicMaterial({color:0x9ccbe6,transparent:true,opacity:.35,depthWrite:false}),lm=new THREE.MeshBasicMaterial({color:0xfff0b0}),gb=(w,h,d,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),gm);m.position.set(x,y,z);g.add(m)};
@@ -1549,6 +1551,7 @@ window.xUpd=(dt,t,cx,cz)=>{if(o4)o4(dt,t,cx,cz);try{
 (()=>{
 const PF={ig:{n:'Pulau IG',e:'📸',c:[0,0],col:'#e1306c'},tt:{n:'Pulau TikTok',e:'🎵',c:[0,0],col:'#25b8c4'},yt:{n:'Pulau YouTube',e:'▶️',c:[0,0],col:'#e53935'}};
 const X=window.PKX={W:[],M:[],MS:[],PF:PF},hs=new Map(),seen=new Set();let first=true;
+const hv=ck=>{const base=CAT[HI()][3],L=CAT.map((c,i)=>i).filter(i=>/^(Rumah|Honai|Tongkonan)/.test(CAT[i][0])&&!/Panjang/.test(CAT[i][0])&&CAT[i][3]<=base*1.3);let h=7;for(const c of ck)h=(h*31+c.charCodeAt(0))|0;return L.length?L[Math.abs(h)%L.length]:HI()};
 const HI=()=>CAT.findIndex(c=>c[0]==='Rumah (bebas)');
 const P=9,G=50,HW=8,HD=8,BX=42,BZ=26;const LAMPS={},MKS={};let gr={},fx=[],rq={ig:45,tt:24,yt:24};
 const cnt=()=>{const c={ig:0,tt:0,yt:0};X.W.forEach(w=>c[w.platform||'ig']++);return c};
@@ -1584,15 +1587,15 @@ const m=new THREE.Matrix4();L.forEach((p,i)=>{lp1.setMatrixAt(i,m.makeTranslatio
 [lp1,lp2,lp3].forEach(o=>{o.frustumCulled=false;S.add(o)});lp3.visible=false}
 setInterval(()=>{HM.color.setHex(night?0xffe7a0:0x888888);if(lp3)lp3.visible=!!night&&!inside},700);
 function draw(){if(typeof CAT==='undefined'||!blds)return;const cn=cnt(),lc=layout(cn);if(lc)markAll();
-fx=blds.filter(b=>!b.auto);const hi=HI();if(hi<0)return;let ch=lc;RPT=[];try{for(const L of PKR.rails)if(L.sp)for(let i=0;i<L.sp.length;i+=3)RPT.push([L.sp[i].x,L.sp[i].z,8]);for(const t of PKR.sts)if(t.grp){const g=t.grp,y=g.rotation.y;RPT.push([g.position.x,g.position.z,11],[g.position.x+Math.sin(y)*13,g.position.z+Math.cos(y)*13,13])}}catch(e){}
+fx=blds.filter(b=>!b.auto);const hi=HI();if(hi<0)return;let ch=lc;RPT=[];try{{const sg=blds.length+'|'+PKR.rails.map(L=>L.p.length).join();if(sg!==X.sg){X.sg=sg;ch=1}}for(const t of PKR.sts)if(t.grp){const g=t.grp,y=g.rotation.y;RPT.push([g.position.x,g.position.z,11],[g.position.x+Math.sin(y)*13,g.position.z+Math.cos(y)*13,13])}}catch(e){}
 for(const[id,b]of[...hs])if(b.pf&&!free(b.x,b.z)){try{bg.remove(b.g)}catch(e){}const i=blds.indexOf(b);if(i>=0)blds.splice(i,1);hs.delete(id);ch=1}
 for(const[id,b]of hs)if(!blds.includes(b))hs.delete(id);
 const used=new Set([...hs.values()].filter(b=>b.ck).map(b=>b.ck)),cs={},rs={},mx={};for(const k in PF){const a=cells(k);cs[k]=a.filter(c=>!c[6]&&!used.has(c[7]));rs[k]=a.filter(c=>c[6])}
-X.W.forEach(w=>{const k=w.platform||'ig',nm='@'+(w.handle||String(w.nama||'').replace(/^@/,'')),o=hs.get('w'+w.id);if(o){if(o.name!==nm){o.name=nm;relabel(o)}return}const s=cs[k].shift();if(!s)return;mx[k]=Math.max(mx[k]||0,Math.abs(s[4]),Math.abs(s[5]));const b={i:hi,x:s[2],z:s[3],name:nm,r:s[8],auto:1,pf:k,ck:s[7],bm:Math.max(Math.abs(s[4]),Math.abs(s[5]))};blds.push(b);addB(b);hs.set('w'+w.id,b);ch=1});
+X.W.forEach(w=>{const k=w.platform||'ig',nm='@'+(w.handle||String(w.nama||'').replace(/^@/,'')),o=hs.get('w'+w.id);if(o){if(o.name!==nm){o.name=nm;relabel(o)}return}const s=cs[k].shift();if(!s)return;mx[k]=Math.max(mx[k]||0,Math.abs(s[4]),Math.abs(s[5]));const b={i:hv(s[7]),x:s[2],z:s[3],name:nm,r:s[8],auto:1,pf:k,ck:s[7],bm:Math.max(Math.abs(s[4]),Math.abs(s[5]))};blds.push(b);addB(b);hs.set('w'+w.id,b);ch=1});
 if(ch)for(const k in PF)roads(k,Math.max(mx[k]||0,[...hs.values()].reduce((m,b)=>b.pf===k?Math.max(m,b.bm||0):m,0)));
 const pi={ig:0,tt:0,yt:0};
 X.M.forEach(m=>{const k=m.pemenang;if(!k||!PF[k])return;const n=pi[k]++,i=CAT.findIndex(c=>c[0]===m.bangunan);if(i<0||hs.has('m'+m.id))return;const s=rs[k][n],x=s?s[2]:PF[k].c[0],z=s?s[3]:PF[k].c[1],b={i,x,z,name:m.bangunan+' 🏆 '+PF[k].n,r:0,auto:1,mk:k};blds.push(b);addB(b);hs.set('m'+m.id,b);ch=1;if(!first&&!seen.has(m.id))toast('🏆 '+PF[k].n+' menang rebutan '+m.bangunan+'!');seen.add(m.id)});
-if(ch)rebuild()}
+if(ch){try{window.PKPIL&&PKPIL()}catch(e){}rebuild()}}
 async function refresh(){try{let a=[],o=0;for(;;){const r=await fetch(SB+'?select=id,nama,handle,platform,dibuat&order=dibuat.asc,id.asc&limit=1000&offset='+o,{headers:H});if(!r.ok){a=null;break}const j=await r.json();a=a.concat(j);if(j.length<1000)break;o+=1000}if(a)X.W=a}catch(e){}
 const gm=async()=>{let old=[],nw=[];
 try{const r=await fetch(API+'milestone_pulau?select=*&order=id',{headers:H});if(r.ok)old=(await r.json()).filter(m=>m.pemenang).map(m=>({...m,id:'o'+m.id}))}catch(e){}
@@ -1778,4 +1781,6 @@ pollC();setInterval(pollC,4000);
 </script>
 
 <script>(()=>{const _sv=save;save=function(){_sv.apply(this,arguments);if(typeof mode!=='undefined'&&mode==='edit'&&window.PKX)setTimeout(()=>PKX.refresh(),1800)}})();</script>
+<script>(()=>{const PAL=[[0xf2e6c9,0xb5533c],[0xcfe3f0,0x3a6ea5],[0xf4c6c6,0x8a3a3a],[0xd6e8c8,0x4f8f5a],[0xf6e3a8,0xd9a441],[0xe0d0f0,0x7a5aa8],[0xf0d8c0,0x6d4a32],[0xc8e6e0,0x2f7a78],[0xffffff,0xc84a6a],[0xe8e4dc,0x3a3f4a],[0xffd9b3,0x5a7a3a],[0xd0d8f8,0xe8503a]],_ab=addB;
+addB=function(b){const c=CAT[b.i];if(c&&b.cc===undefined&&!c[2].nb&&!c[2].lamp&&c[4]<2)b.cc=PAL[Math.floor(hash(b.x*.37+b.i,b.z*.61+3)*PAL.length)%PAL.length];return _ab(b)}})();</script>
 </body></html>
